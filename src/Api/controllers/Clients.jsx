@@ -26,3 +26,11 @@ export const fetchSearchClient = async (data) => {
         console.log(error);
     }
 }
+export const deleteClient = async(data)=>{
+    try {
+        const response = await Axios.delete(`/clients/${data}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+    }
+}

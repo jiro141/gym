@@ -19,10 +19,20 @@ import { useEffect, useState } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import CreateClient from "@/widgets/modals/CreateClient";
 import { Bars3Icon } from "@heroicons/react/24/solid";
+import { FaTrashAlt } from "react-icons/fa";
+import { deleteClient } from "@/Api/controllers/Clients";
+import DeleteClient from "@/widgets/modals/DeleteClient";
 
 export function Tables() {
   const [open, setOpen] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteData, setDeleteData] = useState({
+    id: '',
+    firstName: "",
+    lastName: "",
+
+  })
   const handleOpen = () => setOpen(!open);
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value); // Actualiza el estado con el valor del input
@@ -31,15 +41,23 @@ export function Tables() {
   const { clients, loading, getClient, error } = useClients();
   useEffect(() => {
     getClient();
-  }, []);
+  }, [clients]);
   const { clientsSearch, getSearchClient } = useSearchClient();
-  console.log(searchTerm, 'tabla');
-
   useEffect(() => {
     if (searchTerm) {
       getSearchClient(searchTerm); // Llamar a la función de búsqueda solo si hay un término
     }
   }, [searchTerm, getSearchClient]);
+  // Función handleDelete para eliminar un cliente
+  const handleDelete = (id, firstName, lastName) => {
+    setOpenDelete(!openDelete)
+    setDeleteData({
+      id: id,
+      firstName: firstName,
+      lastName: lastName
+    })
+
+  };
 
   const today = new Date();
   return (
@@ -68,7 +86,7 @@ export function Tables() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Nombre completo", "Inscripcion", "Vencimiento", "Estado", "Vencido"].map((el) => (
+                {["Nombre completo", "Inscripcion", "Vencimiento", "Estado", "Vencido", "Editar", "Borrar"].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -87,7 +105,7 @@ export function Tables() {
               {searchTerm === '' ? (
                 // Renderizar la tabla normal cuando no hay búsqueda
                 clients.map(
-                  ({ firstName, lastName, createdAt, expirationDate, attendance, isActive }, id) => {
+                  ({id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
 
@@ -123,7 +141,7 @@ export function Tables() {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {formatDate(expirationDate)} {/* Fecha formateada */}
+                            {membershipType === 'permanente' ? '----------' : formatDate(expirationDate)} {/* Fecha formateada */}
                           </Typography>
                         </td>
                         <td className={className}>
@@ -137,14 +155,19 @@ export function Tables() {
                         <td className={className}>
                           <Chip
                             variant="gradient"
-                            color={today >= expirationD ? "red" : "blue-gray"}
-                            value={today >= expirationD ? "Vencido" : "Activo"}
+                            color={membershipType === 'permanente' ? 'blue-gray' : today >= expirationD ? "red" : "blue-gray"}
+                            value={membershipType === 'permanente' ? 'Activo' : today >= expirationD ? "Vencido" : "Activo"}
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
                         </td>
                         <td className={className}>
                           <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
                             <PencilIcon className="h-5 w-5 text-blue-gray-600" /> {/* Icono lápiz */}
+                          </button>
+                        </td>
+                        <td className={className}>
+                          <button className="p-0 m-0" onClick={() => handleDelete(id, firstName, lastName)}> {/* Botón sin padding ni margen */}
+                            <FaTrashAlt size={20} color="red" />
                           </button>
                         </td>
                       </tr>
@@ -154,7 +177,9 @@ export function Tables() {
               ) : clientsSearch && clientsSearch.length > 0 ? (
                 // Renderizar los resultados de búsqueda cuando hay coincidencias
                 clientsSearch.map(
-                  ({ firstName, lastName, createdAt, expirationDate, attendance, isActive }, id) => {
+                  ({ firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }, id) => {
+
+
                     const className = `py-3 px-5 ${id === clientsSearch.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
 
@@ -190,7 +215,7 @@ export function Tables() {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {formatDate(expirationDate)} {/* Fecha formateada */}
+                            {membershipType === 'permanente' ? '----------' : formatDate(expirationDate)} {/* Fecha formateada */}
                           </Typography>
                         </td>
                         <td className={className}>
@@ -204,14 +229,19 @@ export function Tables() {
                         <td className={className}>
                           <Chip
                             variant="gradient"
-                            color={today >= expirationD ? "red" : "blue-gray"}
-                            value={today >= expirationD ? "Vencido" : "Activo"}
+                            color={membershipType === 'permanente' ? 'blue-gray' : today >= expirationD ? "red" : "blue-gray"}
+                            value={membershipType === 'permanente' ? 'Activo' : today >= expirationD ? "Vencido" : "Activo"}
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
                         </td>
                         <td className={className}>
                           <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
                             <PencilIcon className="h-5 w-5 text-blue-gray-600" /> {/* Icono lápiz */}
+                          </button>
+                        </td>
+                        <td className={className}>
+                          <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
+                            <FaTrashAlt size={20} color="red" />
                           </button>
                         </td>
                       </tr>
@@ -241,6 +271,15 @@ export function Tables() {
         </DialogBody>
         <DialogFooter>
           <Button onClick={handleOpen}>Cerrar</Button>
+        </DialogFooter>
+      </Dialog>
+      <Dialog open={openDelete} handler={handleDelete}>
+        {/* <DialogHeader>Its a simple modal.</DialogHeader> */}
+        <DialogBody>
+          <DeleteClient deleteData={deleteData} setOpenDelete={setOpenDelete} openDelete={openDelete} />
+        </DialogBody>
+        <DialogFooter>
+          <Button onClick={handleDelete}>Cerrar</Button>
         </DialogFooter>
       </Dialog>
     </div>
