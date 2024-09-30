@@ -25,6 +25,7 @@ export function SignUp() {
     if (idNumber) {
       try {
         const asistente = await Asistencia(idNumber);
+        console.log(asistente.expirationDate),'data';
 
         if (asistente && asistente.expirationDate) {
           const expirationDate = new Date(asistente.expirationDate);
@@ -227,7 +228,7 @@ export function SignUp() {
           </Button>
 
         </form>
-        <Button className="mt-6"  onClick={handleNavigate}>Regresar</Button>
+        <Button className="mt-6" onClick={handleNavigate}>Regresar</Button>
       </div>
     </section>
   );

@@ -23,11 +23,13 @@ import { FaTrashAlt } from "react-icons/fa";
 import { deleteClient } from "@/Api/controllers/Clients";
 import DeleteClient from "@/widgets/modals/DeleteClient";
 import PutClient from "@/widgets/modals/PutClient";
+import UpdateClient from "@/widgets/modals/UpdateClient";
 
 export function Tables() {
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openPut, setOpenPut] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteData, setDeleteData] = useState({
     id: '',
@@ -71,9 +73,16 @@ export function Tables() {
   }, [debouncedSearchTerm, getSearchClient]);
   // Función handleDelete para eliminar un cliente
   const handleDelete = (id, firstName, lastName) => {
-    console.log(id);
-
     setOpenDelete(!openDelete)
+    setDeleteData({
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+    })
+
+  };
+  const handleUpdate = (id, firstName, lastName) => {
+    setOpenUpdate(!openUpdate)
     setDeleteData({
       id: id,
       firstName: firstName,
@@ -113,7 +122,7 @@ export function Tables() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Nombre completo", "Inscripcion", "Vencimiento", "Estado", "Vencido", "Editar", "Borrar"].map((el) => (
+                {["Nombre completo", "Vencimiento", "Estado", "Vencido", "Renovar", " Editar", "Borrar"].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -135,7 +144,7 @@ export function Tables() {
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
-                    console.log(expirationDate);
+                    console.log(expirationDate, 'data');
 
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
@@ -164,12 +173,7 @@ export function Tables() {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {formatDate(createdAt)} {/* Fecha formateada */}
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {membershipType === 'permanente' ? '----------' : expirationDate} {/* Fecha formateada */}
+                            {membershipType === 'permanente' ? '----------' : formatDate(expirationDate)} {/* Fecha formateada */}
                           </Typography>
                         </td>
                         <td className={className}>
@@ -187,6 +191,16 @@ export function Tables() {
                             value={membershipType === 'permanente' ? 'Activo' : today >= expirationD ? "Vencido" : "Activo"}
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
+                        </td>
+                        <td className={className}>
+                          <button className="text-md bg-grey-600 " onClick={() => handleUpdate(id, firstName, lastName)}>
+                            <Chip
+                              variant="gradient"
+                              color={'blue'}
+                              value={"renovar"}
+                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                            />
+                          </button>
                         </td>
                         <td className={className}>
                           <button className="p-0 m-0" onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
@@ -238,11 +252,6 @@ export function Tables() {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {formatDate(createdAt)} {/* Fecha formateada */}
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <Typography className="text-xs font-semibold text-blue-gray-600">
                             {membershipType === 'permanente' ? '----------' : formatDate(expirationDate)} {/* Fecha formateada */}
                           </Typography>
                         </td>
@@ -261,6 +270,9 @@ export function Tables() {
                             value={membershipType === 'permanente' ? 'Activo' : today >= expirationD ? "Vencido" : "Activo"}
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
+                        </td>
+                        <td className={className}>
+                          <Button>Hola</Button>
                         </td>
                         <td className={className}>
                           <button className="p-0 m-0" onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
@@ -315,6 +327,14 @@ export function Tables() {
         </DialogBody>
         <DialogFooter>
           <Button onClick={handlePut}>Cerrar</Button>
+        </DialogFooter>
+      </Dialog>
+      <Dialog open={openUpdate} handler={handleUpdate}>
+        <DialogBody>
+          <UpdateClient deleteData={deleteData} setOpenDelete={setOpenUpdate} openDelete={openUpdate} />
+        </DialogBody>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Cerrar</Button>
         </DialogFooter>
       </Dialog>
     </div>

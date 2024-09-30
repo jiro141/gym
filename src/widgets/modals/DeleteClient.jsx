@@ -3,8 +3,6 @@ import React from 'react'
 import { deleteClient } from '@/Api/controllers/Clients'
 import toast, { Toaster } from 'react-hot-toast';
 export default function DeleteClient({ deleteData, setOpenDelete }) {
-    console.log(deleteData,'data');
-
     const handleDelete = async (id) => {
 
         try {

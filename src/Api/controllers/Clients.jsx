@@ -50,3 +50,11 @@ export const putClient = async (id, data) => {
         console.log(error);
     }
 }
+export const updateClient = async (id, data) => {
+    try {
+        const response = await Axios.put(`/clients/${id}`, data)
+        return response.data;
+    } catch (error) {
+        console.log(error);
+    }
+}
