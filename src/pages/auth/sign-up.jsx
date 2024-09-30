@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import {
   Card,
   Input,
@@ -10,7 +11,7 @@ import { Asistencia } from "@/Api/controllers/Asistencia";
 import { useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { useToast } from "@/context/ToastContext";
-
+import { Sidenav } from "@/widgets/layout";
 export function SignUp() {
   const [idNumber, setIdNumber] = useState(""); // Inicializa el estado con una cadena vacía
   const { showGlobalSuccessToast, showGlobalErrorToast } = useToast();
@@ -18,6 +19,9 @@ export function SignUp() {
   const formattedDate = today.toLocaleDateString("es-ES", {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
+
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
+
   const asistencia = async () => {
     if (idNumber) {
       try {
@@ -28,7 +32,7 @@ export function SignUp() {
 
           if (expirationDate >= today) {
             // Disparar el toast de éxito global
-            showGlobalSuccessToast( asistente.firstName, formattedDate);
+            showGlobalSuccessToast(asistente.firstName, formattedDate);
           } else {
             // Disparar el toast de error global
             showGlobalErrorToast("Tu membresía ha expirado.");
@@ -48,6 +52,10 @@ export function SignUp() {
     }
   };
 
+  // Function to handle the navigation to /dashboard/tables
+  const handleNavigate = () => {
+    navigate("/dashboard/tables"); // Navigate to dashboard/tables
+  };
 
   return (
     <section className="m-8 flex">
@@ -59,6 +67,7 @@ export function SignUp() {
         />
       </div>
       <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
+        {/* Button that navigates */}
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Asistencia</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Ingresa tu número de cédula</Typography>
@@ -82,6 +91,7 @@ export function SignUp() {
           <Button className="mt-6" fullWidth onClick={asistencia}>
             Asistencia
           </Button>
+          <Button className="mt-6" fullWidth onClick={handleNavigate}>Regresar</Button>
         </form>
       </div>
     </section>
