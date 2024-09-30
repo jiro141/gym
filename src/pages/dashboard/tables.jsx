@@ -70,9 +70,15 @@ export function Tables() {
     }
   }, [debouncedSearchTerm, getSearchClient]);
   // Función handleDelete para eliminar un cliente
-  const handleDelete = (id) => {
+  const handleDelete = (id, firstName, lastName) => {
+    console.log(id);
+
     setOpenDelete(!openDelete)
-    setIdData(id)
+    setDeleteData({
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+    })
 
   };
   const handlePut = (id) => {
@@ -256,7 +262,7 @@ export function Tables() {
                           />
                         </td>
                         <td className={className}>
-                          <button className="p-0 m-0"  onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
+                          <button className="p-0 m-0" onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
                             <PencilIcon className="h-5 w-5 text-blue-gray-600" /> {/* Icono lápiz */}
                           </button>
                         </td>
