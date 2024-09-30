@@ -10,11 +10,9 @@ import { Link } from "react-router-dom";
 import { Asistencia } from "@/Api/controllers/Asistencia";
 import { useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
-import { useToast } from "@/context/ToastContext";
 import { Sidenav } from "@/widgets/layout";
 export function SignUp() {
-  const [idNumber, setIdNumber] = useState(""); // Inicializa el estado con una cadena vacía
-  const { showGlobalSuccessToast, showGlobalErrorToast } = useToast();
+  const [idNumber, setIdNumber] = useState("");
   const today = new Date();
   const formattedDate = today.toLocaleDateString("es-ES", {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -22,7 +20,8 @@ export function SignUp() {
 
   const navigate = useNavigate(); // Initialize useNavigate for navigation
 
-  const asistencia = async () => {
+  const asistencia = async (e) => {
+    e.preventDefault()
     if (idNumber) {
       try {
         const asistente = await Asistencia(idNumber);
@@ -31,27 +30,159 @@ export function SignUp() {
           const expirationDate = new Date(asistente.expirationDate);
 
           if (expirationDate >= today) {
-            // Disparar el toast de éxito global
-            showGlobalSuccessToast(asistente.firstName, formattedDate);
-            setTimeout(() => {
-              navigate("/dashboard")
-            }, 1500);
+            toast.custom((t) => (
+              <div
+                className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-green-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+              >
+                <div className="flex-1 w-0 p-4">
+                  <div className="flex items-start">
+                    <div className="ml-3 flex-1">
+                      <p className="text-lg font-bold">
+                        ¡Bienvenido {asistente.firstName}!
+                      </p>
+                      <p className="mt-1 text-md">
+                        {formattedDate}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex border-l border-gray-200">
+                  <button
+                    onClick={() => toast.dismiss(t.id)}
+                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            ));
           } else {
             // Disparar el toast de error global
-            showGlobalErrorToast("Tu membresía ha expirado.");
+            toast.custom((t) => (
+              <div
+                className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-red-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+              >
+                <div className="flex-1 w-0 p-4">
+                  <div className="flex items-start">
+                    <div className="ml-3 flex-1">
+                      <p className="text-lg font-bold">
+                        Tu membresía ha expirado.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex border-l border-gray-200">
+                  <button
+                    onClick={() => toast.dismiss(t.id)}
+                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            ));
           }
         } else {
-          showGlobalErrorToast("Cédula inválida.");
+          toast.custom((t) => (
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-red-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="ml-3 flex-1">
+                    <p className="text-lg font-bold">
+                      Cédula Invalida.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          ));
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
-          showGlobalErrorToast("La cédula no existe.");
+          toast.custom((t) => (
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-red-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="ml-3 flex-1">
+                    <p className="text-lg font-bold">
+                      Cédula no existe.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          ));
         } else {
-          showGlobalErrorToast("Ocurrió un error inesperado.");
+          toast.custom((t) => (
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-red-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="ml-3 flex-1">
+                    <p className="text-lg font-bold">
+                      Ocurrió un error inesperado.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          ));
+
         }
       }
     } else {
-      showGlobalErrorToast("El número de cédula está vacío.");
+      toast.custom((t) => (
+        <div
+          className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-lg w-full bg-red-500 text-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start">
+              <div className="ml-3 flex-1">
+                <p className="text-lg font-bold">
+                  Cédula Vacia.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex border-l border-gray-200">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      ));
     }
   };
 
@@ -91,11 +222,12 @@ export function SignUp() {
               onChange={(e) => setIdNumber(e.target.value)} // Actualizamos el estado con el valor ingresado
             />
           </div>
-          <Button className="mt-6" fullWidth onClick={asistencia}>
+          <Button type="submit" className="mt-6" fullWidth onClick={asistencia}>
             Asistencia
           </Button>
-          <Button className="mt-6" fullWidth onClick={handleNavigate}>Regresar</Button>
+
         </form>
+        <Button className="mt-6"  onClick={handleNavigate}>Regresar</Button>
       </div>
     </section>
   );
