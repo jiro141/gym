@@ -34,6 +34,7 @@ export function SignUp() {
             // Disparar el toast de éxito global
             showGlobalSuccessToast(asistente.firstName, formattedDate);
             setTimeout(() => {
+              navigate("/dashboard")
             }, 1500);
           } else {
             // Disparar el toast de error global
