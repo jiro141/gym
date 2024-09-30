@@ -135,6 +135,7 @@ export function Tables() {
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
+                    console.log(expirationDate);
 
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
@@ -168,7 +169,7 @@ export function Tables() {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {membershipType === 'permanente' ? '----------' : formatDate(expirationDate)} {/* Fecha formateada */}
+                            {membershipType === 'permanente' ? '----------' : expirationDate} {/* Fecha formateada */}
                           </Typography>
                         </td>
                         <td className={className}>

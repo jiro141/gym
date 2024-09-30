@@ -33,6 +33,8 @@ export function SignUp() {
           if (expirationDate >= today) {
             // Disparar el toast de éxito global
             showGlobalSuccessToast(asistente.firstName, formattedDate);
+            setTimeout(() => {
+            }, 1500);
           } else {
             // Disparar el toast de error global
             showGlobalErrorToast("Tu membresía ha expirado.");
