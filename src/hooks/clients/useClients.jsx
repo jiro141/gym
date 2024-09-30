@@ -17,7 +17,7 @@ export function useClients() {
         } finally {
             setloading(false);
         }
-    }, [clients]);
+    }, []);
 
 
 

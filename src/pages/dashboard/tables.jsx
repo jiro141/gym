@@ -22,10 +22,12 @@ import { Bars3Icon } from "@heroicons/react/24/solid";
 import { FaTrashAlt } from "react-icons/fa";
 import { deleteClient } from "@/Api/controllers/Clients";
 import DeleteClient from "@/widgets/modals/DeleteClient";
+import PutClient from "@/widgets/modals/PutClient";
 
 export function Tables() {
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openPut, setOpenPut] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteData, setDeleteData] = useState({
     id: '',
@@ -33,31 +35,50 @@ export function Tables() {
     lastName: "",
 
   })
+  const [idData, setIdData] = useState('')
   const handleOpen = () => setOpen(!open);
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value); // Actualiza el estado con el valor del input
   };
 
   const { clients, loading, getClient, error } = useClients();
-  useEffect(() => {
-    getClient();
-  }, [clients]);
   const { clientsSearch, getSearchClient } = useSearchClient();
+
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  // First useEffect: Fetch clients only once on mount if not already loaded
   useEffect(() => {
-    if (searchTerm) {
-      getSearchClient(searchTerm); // Llamar a la función de búsqueda solo si hay un término
+    // Fetch clients only if the clients array is empty
+    getClient();
+
+  }, []);
+
+  // Second useEffect: Debounce searchTerm changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm); // Update debounced term after delay
+    }, 500);  // 500ms debounce delay
+
+    // Cleanup timeout if searchTerm changes before delay finishes
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Third useEffect: Trigger search request only when debouncedSearchTerm changes
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      getSearchClient(debouncedSearchTerm);  // Call the search API with the debounced term
     }
-  }, [searchTerm, getSearchClient]);
+  }, [debouncedSearchTerm, getSearchClient]);
   // Función handleDelete para eliminar un cliente
-  const handleDelete = (id, firstName, lastName) => {
+  const handleDelete = (id) => {
     setOpenDelete(!openDelete)
-    setDeleteData({
-      id: id,
-      firstName: firstName,
-      lastName: lastName
-    })
+    setIdData(id)
 
   };
+  const handlePut = (id) => {
+    setOpenPut(!openPut)
+    setIdData(id)
+  }
 
   const today = new Date();
   return (
@@ -105,7 +126,7 @@ export function Tables() {
               {searchTerm === '' ? (
                 // Renderizar la tabla normal cuando no hay búsqueda
                 clients.map(
-                  ({id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
+                  ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
 
@@ -161,7 +182,7 @@ export function Tables() {
                           />
                         </td>
                         <td className={className}>
-                          <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
+                          <button className="p-0 m-0" onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
                             <PencilIcon className="h-5 w-5 text-blue-gray-600" /> {/* Icono lápiz */}
                           </button>
                         </td>
@@ -177,7 +198,7 @@ export function Tables() {
               ) : clientsSearch && clientsSearch.length > 0 ? (
                 // Renderizar los resultados de búsqueda cuando hay coincidencias
                 clientsSearch.map(
-                  ({ firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }, id) => {
+                  ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
 
 
                     const className = `py-3 px-5 ${id === clientsSearch.length - 1 ? "" : "border-b border-blue-gray-50"
@@ -235,12 +256,12 @@ export function Tables() {
                           />
                         </td>
                         <td className={className}>
-                          <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
+                          <button className="p-0 m-0"  onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
                             <PencilIcon className="h-5 w-5 text-blue-gray-600" /> {/* Icono lápiz */}
                           </button>
                         </td>
                         <td className={className}>
-                          <button className="p-0 m-0"> {/* Botón sin padding ni margen */}
+                          <button className="p-0 m-0" onClick={() => handleDelete(id, firstName, lastName)}> {/* Botón sin padding ni margen */}
                             <FaTrashAlt size={20} color="red" />
                           </button>
                         </td>
@@ -274,12 +295,19 @@ export function Tables() {
         </DialogFooter>
       </Dialog>
       <Dialog open={openDelete} handler={handleDelete}>
-        {/* <DialogHeader>Its a simple modal.</DialogHeader> */}
         <DialogBody>
           <DeleteClient deleteData={deleteData} setOpenDelete={setOpenDelete} openDelete={openDelete} />
         </DialogBody>
         <DialogFooter>
           <Button onClick={handleDelete}>Cerrar</Button>
+        </DialogFooter>
+      </Dialog>
+      <Dialog open={openPut} handler={handlePut}>
+        <DialogBody>
+          <PutClient id={idData} setOpenPut={setOpenPut} openPut={openPut} />
+        </DialogBody>
+        <DialogFooter>
+          <Button onClick={handlePut}>Cerrar</Button>
         </DialogFooter>
       </Dialog>
     </div>
