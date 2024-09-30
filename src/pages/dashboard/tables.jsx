@@ -272,7 +272,14 @@ export function Tables() {
                           />
                         </td>
                         <td className={className}>
-                          <Button>Hola</Button>
+                          <button className="text-md bg-grey-600 " onClick={() => handleUpdate(id, firstName, lastName)}>
+                            <Chip
+                              variant="gradient"
+                              color={'blue'}
+                              value={"renovar"}
+                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                            />
+                          </button>
                         </td>
                         <td className={className}>
                           <button className="p-0 m-0" onClick={() => handlePut(id)}> {/* Botón sin padding ni margen */}
