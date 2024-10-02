@@ -5,6 +5,7 @@ import { postClients } from "@/Api/controllers/Clients";
 import toast, { Toaster } from "react-hot-toast";
 const CreateClient = ({ handleOpen, open, setOpen }) => {
 
+
     const [isLastStep, setIsLastStep] = React.useState(false);
     const [isFirstStep, setIsFirstStep] = React.useState(false);
 
@@ -144,9 +145,10 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                             value={formData.gender}
                             onChange={(value) => handleSelectChange("gender", value)}
                             required
+
                         >
-                            <Option value="male">Masculino</Option>
-                            <Option value="female">Femenino</Option>
+                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="male">Masculino</Option>
+                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="female">Femenino</Option>
                         </Select>
                         <Select
                             label="Tipo de Membresía"
@@ -154,9 +156,9 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                             onChange={(value) => handleSelectChange("membershipType", value)}
                             required
                         >
-                            <Option value="mensual">Mensual</Option>
-                            <Option value="semanal">Semanal</Option>
-                            <Option value="permanente">Permanente</Option>
+                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="mensual">Mensual</Option>
+                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="semanal">Semanal</Option>
+                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="permanente">Permanente</Option>
                         </Select>
                     </div>
                 )}

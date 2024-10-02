@@ -58,9 +58,9 @@ export default function UpdateClient({ deleteData, setOpenDelete }) {
                 onChange={(value) => handleSelectChange("membershipType", value)}
                 required
             >
-                <Option value="mensual">Mensual</Option>
-                <Option value="semanal">Semanal</Option>
-                <Option value="permanente">Permanente</Option>
+                <Option value="mensual" style={{ color: 'black', fontWeight: 'bold' }}>Mensual</Option>
+                <Option value="semanal" style={{ color: 'black', fontWeight: 'bold' }}>Semanal</Option>
+                <Option value="permanente" style={{ color: 'black', fontWeight: 'bold' }}>Permanente</Option>
             </Select>
             <Button className='my-4' color="green" onClick={() => handleDelete(deleteData.id)}>
                 Confirmar
