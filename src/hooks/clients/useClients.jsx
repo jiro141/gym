@@ -18,12 +18,9 @@ export function useClients() {
             setloading(false);
         }
     }, []);
-
-
-
-
     return { clients, loading, getClient, error };
 }
+
 export function useSearchClient() {
     const [clientsSearch, setClientsSearch] = useState([]); // Estado para guardar todos los clientes
     const [loading, setLoading] = useState(false);

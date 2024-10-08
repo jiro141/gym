@@ -35,7 +35,6 @@ export function Tables() {
     id: '',
     firstName: "",
     lastName: "",
-
   })
   const [idData, setIdData] = useState('')
   const handleOpen = () => setOpen(!open);
@@ -53,7 +52,7 @@ export function Tables() {
     // Fetch clients only if the clients array is empty
     getClient();
 
-  }, []);
+  }, [open, openDelete, openPut, openUpdate]);
 
   // Second useEffect: Debounce searchTerm changes
   useEffect(() => {
@@ -144,8 +143,6 @@ export function Tables() {
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
-                    console.log(expirationDate, 'data');
-
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
                       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
@@ -220,11 +217,8 @@ export function Tables() {
                 // Renderizar los resultados de búsqueda cuando hay coincidencias
                 clientsSearch.map(
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
-
-
                     const className = `py-3 px-5 ${id === clientsSearch.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
-
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
                       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
