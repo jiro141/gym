@@ -31,7 +31,7 @@ const dailySalesChart = {
   series: [
     {
       name: "Sales",
-      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+      data: [50, 40, 10, 320],
     },
   ],
   options: {
@@ -81,7 +81,7 @@ const completedTaskChart = {
     xaxis: {
       ...chartsConfig.xaxis,
       categories: [
-        "Apr",
+        "Ene",
         "May",
         "Jun",
         "Jul",
@@ -114,7 +114,7 @@ export const statisticsChartsData = [
   },
   {
     color: "white",
-    title: "Daily Sales",
+    title: "Ingreso en pesos",
     description: "15% increase in today sales",
     footer: "updated 4 min ago",
     chart: dailySalesChart,

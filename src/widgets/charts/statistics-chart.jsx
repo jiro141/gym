@@ -11,14 +11,15 @@ import Chart from "react-apexcharts";
 export function StatisticsChart({ color, chart, title, description, footer }) {
   return (
     <Card className="border border-blue-gray-100 shadow-sm">
+      <Typography className="px-6 pt-4" variant="h5" color="blue-gray">
+        {title}
+      </Typography>
       <CardHeader variant="gradient" color={color} floated={false} shadow={false}>
         <Chart {...chart} />
       </CardHeader>
       <CardBody className="px-6 pt-0">
-        <Typography variant="h6" color="blue-gray">
-          {title}
-        </Typography>
-        <Typography variant="small" className="font-normal text-blue-gray-600">
+
+        <Typography variant="h6" className="font-normal text-blue-gray-900">
           {description}
         </Typography>
       </CardBody>
