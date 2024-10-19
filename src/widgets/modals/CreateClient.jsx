@@ -13,33 +13,32 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         gender: "",
         membershipType: "",
     });
-    const [fingerprints, setFingerprints] = useState([]); // Store captured fingerprints
+    const [fingerprintData, setFingerprintData] = useState(null); // Para almacenar la huella digital
 
-    // Handle form inputs
+    // Manejar cambios en el formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Function to manually capture the fingerprint
+    // Función para capturar la huella digital
     const captureFingerprint = async () => {
         try {
             const publicKey = {
                 challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
                 rp: { name: "Ejemplo" },
                 user: {
-                    id: Uint8Array.from('random_user_id', c => c.charCodeAt(0)),
-                    name: "user@example.com",
-                    displayName: "Usuario Ejemplo"
+                    id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),  // Usa el ID del formulario
+                    name: `${formData.firstName} ${formData.lastName}`,
+                    displayName: formData.firstName
                 },
                 pubKeyCredParams: [{ alg: -7, type: "public-key" }]
             };
 
             const credential = await navigator.credentials.create({ publicKey });
             if (credential) {
-                setFingerprints([credential]); // Store the captured fingerprint
+                setFingerprintData(credential); // Almacena la huella digital capturada
                 toast.success("Huella capturada con éxito!");
-                console.log("Huella capturada:", credential);
             }
         } catch (error) {
             console.error("Error al capturar la huella:", error);
@@ -50,7 +49,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await postClients({ ...formData, fingerprints });
+            const response = await postClients({ ...formData, fingerprintData });
             if (response) {
                 toast.success('Cliente creado con éxito!');
                 setTimeout(() => setOpen(false), 1500);
