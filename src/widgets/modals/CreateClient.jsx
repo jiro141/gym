@@ -26,18 +26,22 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         try {
             const publicKey = {
                 challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
-                rp: { name: "Ejemplo" },
+                rp: { name: "Ferreira Fitness Gym" }, // Cambia el nombre de la entidad
                 user: {
                     id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),  // Usa el ID del formulario
-                    name: `${formData.firstName} ${formData.lastName}`,
                     displayName: formData.firstName
                 },
-                pubKeyCredParams: [{ alg: -7, type: "public-key" }]
+                pubKeyCredParams: [
+                    { alg: -7, type: "public-key" },  // ES256
+                    { alg: -257, type: "public-key" } // RS256
+                ]
             };
-
+    
             const credential = await navigator.credentials.create({ publicKey });
+    
             if (credential) {
-                setFingerprintData(credential); // Almacena la huella digital capturada
+                // Almacena la nueva huella capturada
+                setFingerprintData(credential); 
                 toast.success("Huella capturada con éxito!");
             }
         } catch (error) {
@@ -45,6 +49,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
             toast.error("Error al capturar la huella");
         }
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();

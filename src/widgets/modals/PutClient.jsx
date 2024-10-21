@@ -17,7 +17,7 @@ export default function PutClient({ id, setOpenPut }) {
         membershipType: "",
     });
     const [fingerprintData, setFingerprintData] = useState(null); // Para almacenar la huella digital
-
+    
     // Fetch client details when the component mounts
     const getData = async () => {
         const response = await getClientsDetails(id);
