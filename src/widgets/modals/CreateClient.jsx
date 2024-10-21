@@ -21,38 +21,44 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const captureFingerprint = async () => {
+    const registerFingerprint = async () => {
         try {
+            // Objeto de desafío para la creación de credenciales
             const publicKey = {
                 challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
-                rp: { 
-                    name: "Ferreira Fitness Gym"  // Asegúrate de que 'name' está definido correctamente aquí
+                rp: {
+                    name: "Nombre de la entidad o sitio"
                 },
                 user: {
-                    id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),  // ID único para el usuario
-                    name: formData.idNumber, // Debe ser una cadena única (por ejemplo, ID o nombre de usuario)
-                    displayName: formData.firstName, // Nombre para mostrar
+                    id: Uint8Array.from('user_unique_id_string', c => c.charCodeAt(0)),  // Cambia el ID por uno único
+                    name: 'user_name',
+                    displayName: 'User Display Name'
                 },
                 pubKeyCredParams: [
                     { alg: -7, type: "public-key" },  // ES256
                     { alg: -257, type: "public-key" } // RS256
-                ]
+                ],
+                authenticatorSelection: {
+                    authenticatorAttachment: "platform", // Se asegura de que use biometría del dispositivo
+                    userVerification: "required"         // Requiere verificación del usuario (huella)
+                },
+                timeout: 60000,  // Tiempo de espera en ms
             };
-    
-            // Intenta crear las credenciales
-            const credential = await navigator.credentials.create({ publicKey });
-    
-            if (credential) {
-                // Almacena la nueva huella capturada
-                setFingerprintData(credential); 
-                toast.success("Huella capturada con éxito!");
+
+            // Crear credenciales nuevas (registro de huella)
+            const newCredential = await navigator.credentials.create({ publicKey });
+
+            if (newCredential) {
+                console.log("Nueva huella registrada:", newCredential);
+                // Aquí puedes enviar la nueva credencial al backend para su almacenamiento
             }
         } catch (error) {
-            console.error("Error al capturar la huella:", error);
-            toast.error("Error al capturar la huella");
+            console.error("Error al registrar la huella:", error);
         }
     };
-    
+
+
+
 
 
     const handleSubmit = async (e) => {
