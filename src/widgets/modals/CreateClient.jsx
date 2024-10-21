@@ -36,12 +36,12 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                     { alg: -257, type: "public-key" } // RS256
                 ]
             };
-    
+
             const credential = await navigator.credentials.create({ publicKey });
-    
+
             if (credential) {
-                // Almacena la nueva huella capturada
-                setFingerprintData(credential); 
+                // Almacena la nueva huella capturada temporalmente
+                setFingerprintData(credential);
                 toast.success("Huella capturada con éxito!");
             }
         } catch (error) {
@@ -49,7 +49,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
             toast.error("Error al capturar la huella");
         }
     };
-    
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
