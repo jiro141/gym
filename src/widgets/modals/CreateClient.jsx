@@ -21,27 +21,30 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    // Función para capturar la huella digital
     const captureFingerprint = async () => {
         try {
             const publicKey = {
                 challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
-                rp: { name: "Ferreira Fitness Gym" }, // Cambia el nombre de la entidad
+                rp: { 
+                    name: "Ferreira Fitness Gym"  // Asegúrate de que 'name' está definido correctamente aquí
+                },
                 user: {
-                    id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),  // Usa el ID del formulario
-                    displayName: formData.firstName
+                    id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),  // ID único para el usuario
+                    name: formData.idNumber, // Debe ser una cadena única (por ejemplo, ID o nombre de usuario)
+                    displayName: formData.firstName, // Nombre para mostrar
                 },
                 pubKeyCredParams: [
                     { alg: -7, type: "public-key" },  // ES256
                     { alg: -257, type: "public-key" } // RS256
                 ]
             };
-
+    
+            // Intenta crear las credenciales
             const credential = await navigator.credentials.create({ publicKey });
-
+    
             if (credential) {
-                // Almacena la nueva huella capturada temporalmente
-                setFingerprintData(credential);
+                // Almacena la nueva huella capturada
+                setFingerprintData(credential); 
                 toast.success("Huella capturada con éxito!");
             }
         } catch (error) {
@@ -49,6 +52,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
             toast.error("Error al capturar la huella");
         }
     };
+    
 
 
     const handleSubmit = async (e) => {
