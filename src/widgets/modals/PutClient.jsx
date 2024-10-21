@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Select, Option, Stepper, Step, StepLabel, Typography } from "@material-tailwind/react";
-import { getClientsDetails } from "@/Api/controllers/Clients";
+import { Button, Input, Select, Option, Stepper, Step } from "@material-tailwind/react";
+import { getClientsDetails, putClient } from "@/Api/controllers/Clients";
 import toast, { Toaster } from "react-hot-toast";
-import { putClient } from "@/Api/controllers/Clients";
 
 export default function PutClient({ id, setOpenPut }) {
     const [isLastStep, setIsLastStep] = React.useState(false);
@@ -17,6 +16,7 @@ export default function PutClient({ id, setOpenPut }) {
         gender: "",
         membershipType: "",
     });
+    const [fingerprintData, setFingerprintData] = useState(null); // Para almacenar la huella digital
 
     // Fetch client details when the component mounts
     const getData = async () => {
@@ -46,11 +46,36 @@ export default function PutClient({ id, setOpenPut }) {
         setFormData({ ...formData, [name]: value });
     };
 
+    // Captura de huella digital
+    const captureFingerprint = async () => {
+        try {
+            const publicKey = {
+                challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
+                rp: { name: "Ejemplo" },
+                user: {
+                    id: Uint8Array.from(formData.idNumber, c => c.charCodeAt(0)),
+                    name: `${formData.firstName} ${formData.lastName}`,
+                    displayName: formData.firstName,
+                },
+                pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            };
+
+            const credential = await navigator.credentials.create({ publicKey });
+            if (credential) {
+                setFingerprintData(credential); // Almacena la huella digital capturada
+                toast.success("Huella capturada con éxito!");
+            }
+        } catch (error) {
+            console.error("Error al capturar la huella:", error);
+            toast.error("Error al capturar la huella");
+        }
+    };
+
     // Submit updated data
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await putClient(id, formData);
+            const response = await putClient(id, { ...formData, fingerprintData });
             if (response) {
                 toast.success("Cliente actualizado con éxito!");
                 setTimeout(() => {
@@ -63,6 +88,7 @@ export default function PutClient({ id, setOpenPut }) {
             toast.error("Error al actualizar: " + error.message);
         }
     };
+
     const handleNext = () => {
         if (activeStep < 2) setActiveStep(activeStep + 1);
     };
@@ -127,8 +153,8 @@ export default function PutClient({ id, setOpenPut }) {
                             onChange={(value) => handleSelectChange("gender", value)}
                             required
                         >
-                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="male">Masculino</Option>
-                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="female">Femenino</Option>
+                            <Option value="male">Masculino</Option>
+                            <Option value="female">Femenino</Option>
                         </Select>
                         <Select
                             label="Tipo de Membresía"
@@ -136,9 +162,9 @@ export default function PutClient({ id, setOpenPut }) {
                             onChange={(value) => handleSelectChange("membershipType", value)}
                             required
                         >
-                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="mensual">Mensual</Option>
-                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="semanal">Semanal</Option>
-                            <Option style={{ color: 'black', fontWeight: 'bold' }} value="permanente">Permanente</Option>
+                            <Option value="mensual">Mensual</Option>
+                            <Option value="semanal">Semanal</Option>
+                            <Option value="permanente">Permanente</Option>
                         </Select>
                     </div>
                 )}
@@ -153,6 +179,12 @@ export default function PutClient({ id, setOpenPut }) {
                             <p><strong>Género:</strong> {formData.gender === "male" ? "Masculino" : "Femenino"}</p>
                             <p><strong>Tipo de Membresía:</strong> {formData.membershipType}</p>
                         </div>
+
+                        {/* Botón para capturar la huella dactilar */}
+                        <Button onClick={captureFingerprint} color="blue-gray">
+                            Capturar Huella Dactilar
+                        </Button>
+
                         <Button type="submit" color="green">
                             Confirmar y Enviar
                         </Button>
