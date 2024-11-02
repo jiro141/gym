@@ -13,6 +13,7 @@
     "@material-tailwind/react": "2.1.4",
     "apexcharts": "3.44.0",
     "axios": "^1.7.7",
+    "face-api.js": "^0.22.2",
     "primereact": "^10.8.2",
     "prop-types": "15.8.1",
     "react": "18.2.0",

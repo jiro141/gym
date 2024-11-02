@@ -1,7 +1,13 @@
 import React, { useState } from "react";
-import { Button, Input, Select, Option, Stepper, Step } from "@material-tailwind/react";
+import {
+    Button, Input, Select, Option, Stepper, Step, Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+} from "@material-tailwind/react";
 import { postClients } from "@/Api/controllers/Clients";
 import toast, { Toaster } from "react-hot-toast";
+import FaceDetection from "./FaceDetection"; // Importar el componente de detección de rostro
 
 const CreateClient = ({ handleOpen, open, setOpen }) => {
     const [activeStep, setActiveStep] = useState(0);
@@ -12,8 +18,11 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         age: "",
         gender: "",
         membershipType: "",
+        fingerprintData: "",
     });
-    const [fingerprintData, setFingerprintData] = useState(null); // Para almacenar la huella digital
+    const [faceDetected, setFaceDetected] = useState(false); // Estado para detección de rostro
+    const [showFaceDetection, setShowFaceDetection] = useState(false); // Estado para mostrar el modal de detección
+    console.log(formData.fingerprintData, 'formulario');
 
     // Manejar cambios en el formulario
     const handleInputChange = (e) => {
@@ -21,50 +30,15 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const captureFingerprint = async () => {
-        try {
-          // Objeto de desafío para la creación de credenciales
-          const publicKey = {
-            challenge: Uint8Array.from('random_challenge_string', c => c.charCodeAt(0)),
-            rp: {
-              name: "Nombre de la entidad o sitio"
-            },
-            user: {
-              id: Uint8Array.from('user_unique_id_string', c => c.charCodeAt(0)),  // Cambia el ID por uno único
-              name: 'user_name',
-              displayName: 'User Display Name'
-            },
-            pubKeyCredParams: [
-              { alg: -7, type: "public-key" },  // ES256
-              { alg: -257, type: "public-key" } // RS256
-            ],
-            authenticatorSelection: {
-              authenticatorAttachment: "platform", // Se asegura de que use biometría del dispositivo
-              userVerification: "required"         // Requiere verificación del usuario (huella)
-            },
-            timeout: 60000,  // Tiempo de espera en ms
-          };
-      
-          // Crear credenciales nuevas (registro de huella)
-          const newCredential = await navigator.credentials.create({ publicKey });
-      
-          if (newCredential) {
-            console.log("Nueva huella registrada:", newCredential);
-            // Aquí puedes enviar la nueva credencial al backend para su almacenamiento
-          }
-        } catch (error) {
-          console.error("Error al registrar la huella:", error);
-        }
-      };
-      
-      
-    
-
+    // Abrir o cerrar el modal de detección de rostro
+    const toggleFaceDetection = () => {
+        setShowFaceDetection(!showFaceDetection);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await postClients({ ...formData, fingerprintData });
+            const response = await postClients(formData);
             if (response) {
                 toast.success('Cliente creado con éxito!');
                 setTimeout(() => setOpen(false), 1500);
@@ -120,14 +94,16 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                             <p><strong>Tipo de Membresía:</strong> {formData.membershipType.charAt(0).toUpperCase() + formData.membershipType.slice(1)}</p>
                         </div>
 
-                        {/* Botón para capturar la huella dactilar */}
-                        <Button onClick={captureFingerprint} color="blue-gray">
-                            Capturar Huella Dactilar
-                        </Button>
+                        {/* Botón para detectar rostro */}
+                        <div className=" mt-8 flex  justify-between	">
+                            <Button onClick={toggleFaceDetection} color="blue-gray">
+                                Detectar Rostro
+                            </Button>
 
-                        <Button type="submit" color="green">
-                            Confirmar y Enviar
-                        </Button>
+                            <Button type="submit" color="green">
+                                Confirmar y Enviar
+                            </Button>
+                        </div>
                     </div>
                 )}
 
@@ -138,6 +114,22 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                     )}
                 </div>
             </form>
+
+            {/* Modal de Detección de Rostros */}
+            <Dialog open={showFaceDetection} handler={toggleFaceDetection}>
+                <DialogBody>
+                    <FaceDetection firstName={formData.fingerprintData}
+                        setFirstName={(printData) => setFormData(prevFormData => ({
+                            ...prevFormData,
+                            fingerprintData: printData
+                        }))} />
+                </DialogBody>
+                <DialogFooter>
+                    <Button color="red" onClick={toggleFaceDetection}>
+                        Cerrar
+                    </Button>
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 };

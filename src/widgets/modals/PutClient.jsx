@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Select, Option, Stepper, Step } from "@material-tailwind/react";
+import {
+    Button, Input, Select, Option, Stepper, Step, Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+} from "@material-tailwind/react";
 import { getClientsDetails, putClient } from "@/Api/controllers/Clients";
 import toast, { Toaster } from "react-hot-toast";
-
+import FaceDetection from "./FaceDetection";
 export default function PutClient({ id, setOpenPut }) {
     const [isLastStep, setIsLastStep] = React.useState(false);
     const [isFirstStep, setIsFirstStep] = React.useState(false);
@@ -15,9 +20,9 @@ export default function PutClient({ id, setOpenPut }) {
         age: "",
         gender: "",
         membershipType: "",
+        fingerprintData: "",
     });
-    const [fingerprintData, setFingerprintData] = useState(null); // Para almacenar la huella digital
-    
+    const [showFaceDetection, setShowFaceDetection] = useState(false);
     // Fetch client details when the component mounts
     const getData = async () => {
         const response = await getClientsDetails(id);
@@ -45,7 +50,9 @@ export default function PutClient({ id, setOpenPut }) {
     const handleSelectChange = (name, value) => {
         setFormData({ ...formData, [name]: value });
     };
-
+    const toggleFaceDetection = () => {
+        setShowFaceDetection(!showFaceDetection);
+    };
     // Captura de huella digital
     const captureFingerprint = async () => {
         try {
@@ -180,14 +187,15 @@ export default function PutClient({ id, setOpenPut }) {
                             <p><strong>Tipo de Membresía:</strong> {formData.membershipType}</p>
                         </div>
 
-                        {/* Botón para capturar la huella dactilar */}
-                        <Button onClick={captureFingerprint} color="blue-gray">
-                            Capturar Huella Dactilar
-                        </Button>
+                        <div className=" mt-8 flex  justify-between	">
+                            <Button onClick={toggleFaceDetection} color="blue-gray">
+                                Detectar Rostro
+                            </Button>
 
-                        <Button type="submit" color="green">
-                            Confirmar y Enviar
-                        </Button>
+                            <Button type="submit" color="green">
+                                Confirmar y Enviar
+                            </Button>
+                        </div>
                     </div>
                 )}
 
@@ -202,6 +210,20 @@ export default function PutClient({ id, setOpenPut }) {
                     )}
                 </div>
             </form>
+            <Dialog open={showFaceDetection} handler={toggleFaceDetection}>
+                <DialogBody>
+                    <FaceDetection firstName={formData.fingerprintData}
+                        setFirstName={(printData) => setFormData(prevFormData => ({
+                            ...prevFormData,
+                            fingerprintData: printData
+                        }))} />
+                </DialogBody>
+                <DialogFooter>
+                    <Button color="red" onClick={toggleFaceDetection}>
+                        Cerrar
+                    </Button>
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 }
