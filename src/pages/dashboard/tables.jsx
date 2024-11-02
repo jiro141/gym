@@ -100,7 +100,7 @@ export function Tables() {
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex  justify-between">
           <Typography variant="h6" color="white">
-            Clientes
+           Cantidad de clientes: {clients?.length}
           </Typography>
           <div className="mr-auto md:mr-4 md:w-56">
             <Input
