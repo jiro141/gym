@@ -140,7 +140,7 @@ export function SignUp() {
 
   // Llamamos a la detección de rostros cada segundo
   useEffect(() => {
-    const interval = setInterval(detectFace, 5000); // Detectar cada segundo
+    const interval = setInterval(detectFace, 2000); // Detectar cada segundo
     return () => clearInterval(interval); // Limpieza al desmontar el componente
   }, [lastSentDescriptor]);
 
