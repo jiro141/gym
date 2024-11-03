@@ -160,8 +160,8 @@ export default function PutClient({ id, setOpenPut }) {
                             onChange={(value) => handleSelectChange("gender", value)}
                             required
                         >
-                            <Option value="male">Masculino</Option>
-                            <Option value="female">Femenino</Option>
+                            <Option className="text-black font-bold	" value="male">Masculino</Option>
+                            <Option className="text-black font-bold	" value="female">Femenino</Option>
                         </Select>
                         <Select
                             label="Tipo de Membresía"
@@ -169,9 +169,9 @@ export default function PutClient({ id, setOpenPut }) {
                             onChange={(value) => handleSelectChange("membershipType", value)}
                             required
                         >
-                            <Option value="mensual">Mensual</Option>
-                            <Option value="semanal">Semanal</Option>
-                            <Option value="permanente">Permanente</Option>
+                            <Option className="text-black font-bold	" value="mensual">Mensual</Option>
+                            <Option className="text-black font-bold	" value="semanal">Semanal</Option>
+                            <Option className="text-black font-bold	" value="permanente">Permanente</Option>
                         </Select>
                     </div>
                 )}

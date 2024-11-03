@@ -66,12 +66,12 @@ export function SignUp() {
 
       const asistente = await Asistencia(dataToSend); // Enviar `idNumber` o `faceDescriptor` según corresponda
       const formattedExpiration = new Date(asistente.expirationDate).toLocaleDateString("es-ES", {
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
         day: 'numeric'
       });
-      
+
       if (asistente && asistente.expirationDate) {
         const expirationDate = new Date(asistente.expirationDate);
         if (expirationDate >= today) {
@@ -83,12 +83,14 @@ export function SignUp() {
               <div className="flex-1 w-0 p-4">
                 <div className="flex items-start">
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-50	text-base	">
-                      {asistente.firstName} {asistencia.lastName}
+                    <p className="text-sm font-medium text-gray-50	text-[20px]	">
+                     Bienvenido {asistente.firstName} {asistencia.lastName} !
                     </p>
-                    <p className="mt-1 text-sm text-gray-50	text-base	">
-                      Hoy {formattedDate}, vence el {formattedExpiration}
+                    <p className="mt-1 text-sm text-gray-50	text-[18px]	">
+                      Hoy {formattedDate} <br />
+                      Vence el {formattedExpiration}
                     </p>
+
                   </div>
                 </div>
               </div>
@@ -103,7 +105,34 @@ export function SignUp() {
             </div>
           ))
         } else {
-          toast.error("Tu membresía ha expirado.");
+          toast.custom((t) => (
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'
+                } max-w-md w-full bg-red-500	 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-gray-50	text-[20px]	">
+                      {asistente.firstName} {asistencia.lastName}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-50	text-[18px]	">
+                      Vencido el {formattedExpiration} <br/> Por favor, renovar.
+                    </p>
+
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ))
         }
       } else {
         toast.error("No se encontró el cliente.");

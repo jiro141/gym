@@ -68,16 +68,16 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                 )}
 
                 {activeStep === 1 && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 text-black">
                         <Input label="Edad" name="age" type="number" value={formData.age} onChange={handleInputChange} required />
                         <Select label="Género" value={formData.gender} onChange={(value) => setFormData({ ...formData, gender: value })} required>
-                            <Option value="male">Masculino</Option>
-                            <Option value="female">Femenino</Option>
+                            <Option className="text-black font-bold	" value="male">Masculino</Option>
+                            <Option className="text-black font-bold	" value="female">Femenino</Option>
                         </Select>
                         <Select label="Tipo de Membresía" value={formData.membershipType} onChange={(value) => setFormData({ ...formData, membershipType: value })} required>
-                            <Option value="mensual">Mensual</Option>
-                            <Option value="semanal">Semanal</Option>
-                            <Option value="permanente">Permanente</Option>
+                            <Option className="text-black font-bold	" value="mensual">Mensual</Option>
+                            <Option className="text-black font-bold	" value="semanal">Semanal</Option>
+                            <Option className="text-black font-bold	" value="permanente">Permanente</Option>
                         </Select>
                     </div>
                 )}
