@@ -83,10 +83,10 @@ export function SignUp() {
               <div className="flex-1 w-0 p-4">
                 <div className="flex items-start">
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-50	">
+                    <p className="text-sm font-medium text-gray-50	text-base	">
                       {asistente.firstName} {asistencia.lastName}
                     </p>
-                    <p className="mt-1 text-sm text-gray-50	">
+                    <p className="mt-1 text-sm text-gray-50	text-base	">
                       Hoy {formattedDate}, vence el {formattedExpiration}
                     </p>
                   </div>
