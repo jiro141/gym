@@ -22,7 +22,6 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
     });
     const [faceDetected, setFaceDetected] = useState(false); // Estado para detección de rostro
     const [showFaceDetection, setShowFaceDetection] = useState(false); // Estado para mostrar el modal de detección
-    console.log(formData.fingerprintData, 'formulario');
 
     // Manejar cambios en el formulario
     const handleInputChange = (e) => {
@@ -96,7 +95,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
 
                         {/* Botón para detectar rostro */}
                         <div className=" mt-8 flex  justify-between	">
-                            <Button onClick={toggleFaceDetection} color="blue-gray">
+                            <Button onClick={toggleFaceDetection} color="blue">
                                 Detectar Rostro
                             </Button>
 
@@ -118,11 +117,14 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
             {/* Modal de Detección de Rostros */}
             <Dialog open={showFaceDetection} handler={toggleFaceDetection}>
                 <DialogBody>
-                    <FaceDetection firstName={formData.fingerprintData}
+                    <FaceDetection
+                        firstName={formData.fingerprintData}
                         setFirstName={(printData) => setFormData(prevFormData => ({
                             ...prevFormData,
                             fingerprintData: printData
-                        }))} />
+                        }))}
+                        showFaceDetection={showFaceDetection}
+                        setShowFaceDetection={setShowFaceDetection} />
                 </DialogBody>
                 <DialogFooter>
                     <Button color="red" onClick={toggleFaceDetection}>

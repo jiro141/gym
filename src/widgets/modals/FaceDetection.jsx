@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button, Typography } from "@material-tailwind/react";
 import * as faceapi from "face-api.js";
-
-export function FaceDetection({ firstName, setFirstName }) {
+import toast, { Toaster } from "react-hot-toast";
+export function FaceDetection({ firstName, setFirstName, showFaceDetection, setShowFaceDetection }) {
     const [previewImage, setPreviewImage] = useState(null); // Estado para la vista previa de la imagen capturada
     const [faceDetected, setFaceDetected] = useState(false); // Estado para indicar si se detectó un rostro
     const [faceDescriptor, setFaceDescriptor] = useState(null); // Estado para guardar el descriptor del rostro
@@ -68,9 +68,12 @@ export function FaceDetection({ firstName, setFirstName }) {
     const handleSave = () => {
         if (faceDescriptor) {
             setFirstName(faceDescriptor)
-            alert("Imagen y descriptor guardados correctamente");
+            toast.success("Rostro captado con éxito!");
+            setTimeout(() => {
+                setShowFaceDetection(false);
+            }, 1500);
         } else {
-            alert("No se ha detectado un rostro para guardar");
+            toast.error("Error al captar rostro!");
         }
     };
 
@@ -84,6 +87,7 @@ export function FaceDetection({ firstName, setFirstName }) {
 
     return (
         <section className="m-8">
+            <Toaster />
             <div className="w-5/5 hidden lg:block">
                 {previewImage ? (
                     <img

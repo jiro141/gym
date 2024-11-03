@@ -82,7 +82,7 @@ export default function PutClient({ id, setOpenPut }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await putClient(id, { ...formData, fingerprintData });
+            const response = await putClient(id, { ...formData });
             if (response) {
                 toast.success("Cliente actualizado con éxito!");
                 setTimeout(() => {
@@ -188,7 +188,7 @@ export default function PutClient({ id, setOpenPut }) {
                         </div>
 
                         <div className=" mt-8 flex  justify-between	">
-                            <Button onClick={toggleFaceDetection} color="blue-gray">
+                            <Button onClick={toggleFaceDetection} color="blue">
                                 Detectar Rostro
                             </Button>
 
@@ -212,11 +212,14 @@ export default function PutClient({ id, setOpenPut }) {
             </form>
             <Dialog open={showFaceDetection} handler={toggleFaceDetection}>
                 <DialogBody>
-                    <FaceDetection firstName={formData.fingerprintData}
+                    <FaceDetection
+                        firstName={formData.fingerprintData}
                         setFirstName={(printData) => setFormData(prevFormData => ({
                             ...prevFormData,
                             fingerprintData: printData
-                        }))} />
+                        }))}
+                        showFaceDetection={showFaceDetection}
+                        setShowFaceDetection={setShowFaceDetection} />
                 </DialogBody>
                 <DialogFooter>
                     <Button color="red" onClick={toggleFaceDetection}>

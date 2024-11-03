@@ -56,8 +56,8 @@ export function SignUp() {
       const dataToSend = idNumber
         ? { idNumber }
         : faceDescriptor
-        ? { fingerprintData: faceDescriptor }
-        : null;
+          ? { fingerprintData: faceDescriptor }
+          : null;
 
       if (!dataToSend) {
         toast.error("Cédula o rostro no detectados");
@@ -65,11 +65,43 @@ export function SignUp() {
       }
 
       const asistente = await Asistencia(dataToSend); // Enviar `idNumber` o `faceDescriptor` según corresponda
-
+      const formattedExpiration = new Date(asistente.expirationDate).toLocaleDateString("es-ES", {
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
+      });
+      
       if (asistente && asistente.expirationDate) {
         const expirationDate = new Date(asistente.expirationDate);
         if (expirationDate >= today) {
-          toast.success(`¡Bienvenido ${asistente.firstName}!`);
+          toast.custom((t) => (
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'
+                } max-w-md w-full bg-green-500	 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-gray-50	">
+                      {asistente.firstName} {asistencia.lastName}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-50	">
+                      Hoy {formattedDate}, vence el {formattedExpiration}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ))
         } else {
           toast.error("Tu membresía ha expirado.");
         }
@@ -108,7 +140,7 @@ export function SignUp() {
 
   // Llamamos a la detección de rostros cada segundo
   useEffect(() => {
-    const interval = setInterval(detectFace, 1000); // Detectar cada segundo
+    const interval = setInterval(detectFace, 5000); // Detectar cada segundo
     return () => clearInterval(interval); // Limpieza al desmontar el componente
   }, [lastSentDescriptor]);
 
@@ -128,7 +160,7 @@ export function SignUp() {
           className="h-[80vh] w-full object-cover rounded-3xl"
         />
       </div>
-      
+
       <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Asistencia</Typography>
