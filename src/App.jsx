@@ -8,15 +8,14 @@ function App() {
       <Route
         path="/dashboard/*"
         element={
-
+          <ProtectedRoute>
             <Dashboard />
-
+          </ProtectedRoute>
         }
       />
       <Route path="/auth/*" element={<Auth />} />
       <Route path="*" element={<Navigate to="/auth/sign-in" replace />} />
     </Routes>
-
   );
 }
 

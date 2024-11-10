@@ -90,18 +90,8 @@ export function Home() {
       const paymetDataWeekPesos = await getPaymetWeekPesos();
       const paymetDataWeekDolares = await getPaymetWeekDolares();
 
-      // Filtrar datos de la semana actual
-      const currentWeek = new Date().getWeekNumber();
-      setWeekPesos(
-        paymetDataWeekPesos.filter(
-          (payment) => payment.week === currentWeek.toString()
-        )
-      );
-      setWeekDolares(
-        paymetDataWeekDolares.filter(
-          (payment) => payment.week === currentWeek.toString()
-        )
-      );
+      setWeekPesos(paymetDataWeekPesos);
+      setWeekDolares(paymetDataWeekDolares);
     };
 
     fetchPaymentData();
@@ -115,6 +105,7 @@ export function Home() {
     array.length > 0 ? array[array.length - 1].totalPayments : 0;
 
   // Variables para el último pago semanal en pesos y dólares
+
   const lastTotalPayment = getLastTotalPayment(weekPesos);
   const lastTotalPaymentDolares = getLastTotalPayment(weekDolares);
 
