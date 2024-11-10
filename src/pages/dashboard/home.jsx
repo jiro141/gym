@@ -38,7 +38,7 @@ export function Home() {
   const submitPaymentData = async () => {
     try {
       // Llamada a la función `createPayment` con `paymentData`
-      const response = await createPayment(paymentData);
+      const response = await createPaymet(paymentData);
 
       // Verifica si la respuesta es exitosa
       if (response) {
