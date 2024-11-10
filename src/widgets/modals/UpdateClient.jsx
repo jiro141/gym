@@ -74,30 +74,37 @@ export default function UpdateClient({ deleteData, setOpenDelete }) {
         Confirma renovar a:
       </Typography>
       <Toaster />
-      <Typography className="text-xl py-4">
-        {deleteData.firstName} {deleteData.lastName}
-      </Typography>
-      <Typography className="text-xl py-4">Tipo de membresia</Typography>
-      <Select
-        label="Tipo de Membresía"
-        value={formData.membershipType}
-        onChange={(value) => handleSelectChange("membershipType", value)}
-        required
-      >
-        <Option value="mensual" style={{ color: "black", fontWeight: "bold" }}>
-          Mensual
-        </Option>
-        <Option value="semanal" style={{ color: "black", fontWeight: "bold" }}>
-          Semanal
-        </Option>
-        <Option
-          value="permanente"
-          style={{ color: "black", fontWeight: "bold" }}
-        >
-          Permanente
-        </Option>
-      </Select>
       <div className="space-y-4 text-black">
+        <Typography className="text-xl py-4">
+          {deleteData.firstName} {deleteData.lastName}
+        </Typography>
+        <Typography className="text-xl py-4">Tipo de membresia</Typography>
+        <Select
+          label="Tipo de Membresía"
+          value={formData.membershipType}
+          onChange={(value) => handleSelectChange("membershipType", value)}
+          required
+        >
+          <Option
+            value="mensual"
+            style={{ color: "black", fontWeight: "bold" }}
+          >
+            Mensual
+          </Option>
+          <Option
+            value="semanal"
+            style={{ color: "black", fontWeight: "bold" }}
+          >
+            Semanal
+          </Option>
+          <Option
+            value="permanente"
+            style={{ color: "black", fontWeight: "bold" }}
+          >
+            Permanente
+          </Option>
+        </Select>
+
         <Select
           label="Moneda de pago"
           value={paymentData.currency}

@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
   Typography,
-  Card,
   CardHeader,
-  CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
+  Input,
+  Select,
+  Option,
 } from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
@@ -25,26 +15,59 @@ import { getPaymetDayDolares } from "@/Api/controllers/Paymet";
 import { getPaymetWeekPesos } from "@/Api/controllers/Paymet";
 import { getPaymetWeekDolares } from "@/Api/controllers/Paymet";
 import { chartsConfig } from "@/configs";
+import { createPaymet } from "@/Api/controllers/Paymet";
+import toast, { Toaster } from "react-hot-toast";
 
 export function Home() {
   const [montoDiaPesos, setMontoDiaPesos] = useState([]);
   const [diasAbreviados, setDiasAbreviados] = useState([]);
   const [montoDiaDolares, setMontoDiaDolares] = useState([]);
   const [diasAbreviadosD, setDiasAbreviadosD] = useState([]);
-  const [weekPesos, setWeekPesos] = useState([])
-  const [weekDolares, setWeekDolares] = useState([])
+  const [weekPesos, setWeekPesos] = useState([]);
+  const [weekDolares, setWeekDolares] = useState([]);
+  const [paymentData, setPaymentData] = useState({
+    amount: "",
+    currency: "",
+  });
+  const handlePaymentDataChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentData({ ...paymentData, [name]: value });
+  };
+  const [refreshData, setRefreshData] = useState(false);
+
+  const submitPaymentData = async () => {
+    try {
+      // Llamada a la función `createPayment` con `paymentData`
+      const response = await createPayment(paymentData);
+
+      // Verifica si la respuesta es exitosa
+      if (response) {
+        toast.success("Pago realizado con éxito!");
+        // Cambia el estado para disparar el useEffect nuevamente
+        setRefreshData((prev) => !prev);
+      } else {
+        throw new Error("Error inesperado al procesar el pago");
+      }
+    } catch (error) {
+      // Manejo de errores con un mensaje de notificación
+      toast.error(error.message || "Error inesperado al realizar el pago");
+    }
+  };
+
   useEffect(() => {
     const fetchPaymentData = async () => {
       const paymentData = await getPaymetDayPesos();
 
       // Extraer los valores de totalPayments
-      const totalPaymentsArray = paymentData.map(payment => payment.totalPayments);
+      const totalPaymentsArray = paymentData.map(
+        (payment) => payment.totalPayments
+      );
       setMontoDiaPesos(totalPaymentsArray);
 
       // Convertir la fecha a la abreviatura del día en español
-      const diasAbreviadosArray = paymentData.map(payment => {
+      const diasAbreviadosArray = paymentData.map((payment) => {
         const fecha = new Date(payment.date);
-        const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
         // Obtener el día de la semana (0 = Domingo, 6 = Sábado)
         return diasSemana[fecha.getDay()];
@@ -52,12 +75,14 @@ export function Home() {
 
       // Obtener datos de dólares
       const paymentDataDolares = await getPaymetDayDolares();
-      const totalPaymentsArrayDolares = paymentDataDolares.map(payment => payment.totalPayments);
+      const totalPaymentsArrayDolares = paymentDataDolares.map(
+        (payment) => payment.totalPayments
+      );
       setMontoDiaDolares(totalPaymentsArrayDolares);
 
-      const diasAbreviadosArrayD = paymentDataDolares.map(payment => {
+      const diasAbreviadosArrayD = paymentDataDolares.map((payment) => {
         const fecha = new Date(payment.date);
-        const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
         // Obtener el día de la semana (0 = Domingo, 6 = Sábado)
         return diasSemana[fecha.getDay()];
@@ -82,8 +107,13 @@ export function Home() {
       const currentWeek = getWeekNumber(new Date());
 
       // Filtrar los datos de la semana actual
-      const currentWeekPayments = paymetDataWeekPesos.filter(payment => payment.week === currentWeek.toString());
-      const currentWeekPaymentsDolares = paymetDataWeekDolares.filter(payment => payment.week === currentWeek.toString());
+      const currentWeekPayments = paymetDataWeekPesos.filter(
+        (payment) => payment.week === currentWeek.toString()
+      );
+      const currentWeekPaymentsDolares = paymetDataWeekDolares.filter(
+        (payment) => payment.week === currentWeek.toString()
+      );
+
       // Establecer los datos filtrados
       setWeekPesos(currentWeekPayments);
       setWeekDolares(currentWeekPaymentsDolares);
@@ -99,10 +129,8 @@ export function Home() {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  }, []); // Ejecutar solo cuando el componente se monta
-
-
-
+  }, [refreshData]); // Dependencia en refreshData
+  // Ejecutar solo cuando el componente se monta
 
   const graficoDiaDolares = {
     type: "line",
@@ -179,7 +207,6 @@ export function Home() {
   };
 
   const statisticsChartsData = [
-
     {
       color: "white",
       title: "Ingreso en pesos",
@@ -204,11 +231,53 @@ export function Home() {
   ];
   return (
     <div className="mt-12">
-      <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex  justify-between">
+      <Toaster />
+      <CardHeader
+        variant="gradient"
+        color="gray"
+        className="mb-8 p-6 flex justify-between overflow-visible" // Permite el desbordamiento
+      >
         <Typography variant="h6" color="white">
-          Clientes
+          Clientes diarios
         </Typography>
+        <div className="space-x-4 text-black flex relative">
+          <Select
+            className="bg-white z-10" // z-index para superponer
+            label="Moneda de pago"
+            value={paymentData.currency}
+            onChange={(value) =>
+              setPaymentData({ ...paymentData, currency: value })
+            }
+            required
+          >
+            <Option className="text-black font-bold" value="pesos">
+              pesos
+            </Option>
+            <Option className="text-black font-bold" value="dolares">
+              dolares
+            </Option>
+          </Select>
+
+          <Input
+            className="bg-white" // Fondo blanco
+            label="Monto"
+            name="amount"
+            type="number"
+            value={paymentData.amount}
+            onChange={handlePaymentDataChange}
+            required
+          />
+          <button
+            className="p-1 m-0 w-16 flex bg-yellow-400 rounded-md "
+            onClick={submitPaymentData}
+          >
+            <Typography variant="h6" color="black">
+              Pagar
+            </Typography>
+          </button>
+        </div>
       </CardHeader>
+
       <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
@@ -219,7 +288,10 @@ export function Home() {
                 variant="small"
                 className="flex items-center font-normal text-blue-gray-600"
               >
-                <ClockIcon strokeWidth={2} className="h-4 w-4 text-blue-gray-400" />
+                <ClockIcon
+                  strokeWidth={2}
+                  className="h-4 w-4 text-blue-gray-400"
+                />
                 &nbsp;{props.footer}
               </Typography>
             }
