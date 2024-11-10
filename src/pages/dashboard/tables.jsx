@@ -139,7 +139,7 @@ export function Tables() {
             <tbody>
               {searchTerm === '' ? (
                 // Renderizar la tabla normal cuando no hay búsqueda
-                clients.map(
+                clients?.map(
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clients.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
@@ -215,7 +215,7 @@ export function Tables() {
                 )
               ) : clientsSearch && clientsSearch.length > 0 ? (
                 // Renderizar los resultados de búsqueda cuando hay coincidencias
-                clientsSearch.map(
+                clientsSearch?.map(
                   ({ id, firstName, lastName, createdAt, expirationDate, attendance, isActive, membershipType }) => {
                     const className = `py-3 px-5 ${id === clientsSearch.length - 1 ? "" : "border-b border-blue-gray-50"
                       }`;
