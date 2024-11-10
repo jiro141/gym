@@ -209,19 +209,31 @@ export function Home() {
       },
     },
   };
+  const getLastTotalPayment = (array) => {
+    return array.length > 0 ? array[array.length - 1].totalPayments : null;
+  };
+  const getLastTotalPaymentDolares = (array) => {
+    return array.length > 0 ? array[array.length - 1].totalPayments : null;
+  };
+
+  // Ejemplo de uso
+  const lastTotalPayment = getLastTotalPayment(weekPesos);
+  const lastTotalPaymentDolares = getLastTotalPaymentDolares(weekDolares);
+
+  // Ejemplo de uso
 
   const statisticsChartsData = [
     {
       color: "white",
       title: "Ingreso en pesos",
-      description: `Total de ingresos esta semana ${weekPesos[0]?.totalPayments} $`,
+      description: `Total de ingresos esta semana ${lastTotalPayment} $`,
       footer: "updated 4 min ago",
       chart: graficoDiaPesos,
     },
     {
       color: "white",
       title: "Ingreso en dolares",
-      description: `Total de ingresos esta semana ${weekDolares[0]?.totalPayments} $`,
+      description: `Total de ingresos esta semana ${lastTotalPaymentDolares} $`,
       footer: "just updated",
       chart: graficoDiaDolares,
     },
