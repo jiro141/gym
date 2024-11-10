@@ -6,259 +6,177 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import { EllipsisVerticalIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { getPaymetDayPesos } from "@/Api/controllers/Paymet";
-import { getPaymetDayDolares } from "@/Api/controllers/Paymet";
-import { getPaymetWeekPesos } from "@/Api/controllers/Paymet";
-import { getPaymetWeekDolares } from "@/Api/controllers/Paymet";
-import { chartsConfig } from "@/configs";
-import { createPaymet } from "@/Api/controllers/Paymet";
+import { ClockIcon } from "@heroicons/react/24/solid";
+import {
+  getPaymetDayPesos,
+  getPaymetDayDolares,
+  getPaymetWeekPesos,
+  getPaymetWeekDolares,
+  createPaymet,
+} from "@/Api/controllers/Paymet";
 import toast, { Toaster } from "react-hot-toast";
+import { chartsConfig } from "@/configs";
+import { StatisticsChart } from "@/widgets/charts";
 
 export function Home() {
+  // Estados para almacenar datos diarios y semanales de pesos y dólares
   const [montoDiaPesos, setMontoDiaPesos] = useState([]);
   const [diasAbreviados, setDiasAbreviados] = useState([]);
   const [montoDiaDolares, setMontoDiaDolares] = useState([]);
   const [diasAbreviadosD, setDiasAbreviadosD] = useState([]);
   const [weekPesos, setWeekPesos] = useState([]);
   const [weekDolares, setWeekDolares] = useState([]);
+
+  // Estado para los datos de pago actuales
   const [paymentData, setPaymentData] = useState({
     amount: "",
     currency: "",
   });
 
+  // Función para manejar cambios en los campos de pago
   const handlePaymentDataChange = (e) => {
     const { name, value } = e.target;
     setPaymentData({ ...paymentData, [name]: value });
   };
 
+  // Estado para refrescar datos después de una actualización de pago
   const [refreshData, setRefreshData] = useState(false);
 
+  // Función para enviar datos de pago
   const submitPaymentData = async () => {
     try {
-      // Llamada a la función `createPayment` con `paymentData`
       const response = await createPaymet(paymentData);
-
-      // Verifica si la respuesta es exitosa
       if (response) {
         toast.success("Pago realizado con éxito!");
-        // Cambia el estado para disparar el useEffect nuevamente
-        setRefreshData((prev) => !prev);
-        // Limpia los campos de `paymentData` después de una respuesta exitosa
-        setPaymentData({ amount: "", currency: "" });
+        setRefreshData((prev) => !prev); // Refresca los datos
+        setPaymentData({ amount: "", currency: "" }); // Limpia los campos de pago
       } else {
         throw new Error("Error inesperado al procesar el pago");
       }
     } catch (error) {
-      // Manejo de errores con un mensaje de notificación
       toast.error(error.message || "Error inesperado al realizar el pago");
     }
   };
 
+  // Hook para obtener datos iniciales y cada vez que se refrescan
   useEffect(() => {
     const fetchPaymentData = async () => {
+      // Obtener datos diarios en pesos
       const paymentData = await getPaymetDayPesos();
+      setMontoDiaPesos(paymentData.map((payment) => payment.totalPayments));
 
-      // Extraer los valores de totalPayments
-      const totalPaymentsArray = paymentData.map(
-        (payment) => payment.totalPayments
-      );
-      setMontoDiaPesos(totalPaymentsArray);
-
-      // Convertir la fecha a la abreviatura del día en español
+      // Obtener abreviatura de días
       const diasAbreviadosArray = paymentData.map((payment) => {
         const fecha = new Date(payment.date);
         const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-        // Obtener el día de la semana (0 = Domingo, 6 = Sábado)
         return diasSemana[fecha.getDay()];
       });
+      setDiasAbreviados(diasAbreviadosArray);
 
-      // Obtener datos de dólares
+      // Obtener datos diarios en dólares
       const paymentDataDolares = await getPaymetDayDolares();
-      const totalPaymentsArrayDolares = paymentDataDolares.map(
-        (payment) => payment.totalPayments
+      setMontoDiaDolares(
+        paymentDataDolares.map((payment) => payment.totalPayments)
       );
-      setMontoDiaDolares(totalPaymentsArrayDolares);
 
       const diasAbreviadosArrayD = paymentDataDolares.map((payment) => {
         const fecha = new Date(payment.date);
         const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-        // Obtener el día de la semana (0 = Domingo, 6 = Sábado)
         return diasSemana[fecha.getDay()];
       });
-
-      // Guardar las abreviaturas de los días en el estado
-      setDiasAbreviados(diasAbreviadosArray);
       setDiasAbreviadosD(diasAbreviadosArrayD);
 
-      // Función para calcular la semana del año
-      const getWeekNumber = (date) => {
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-        return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-      };
-
-      // Obtener datos de pagos de la semana en pesos
+      // Obtener datos semanales en pesos y dólares
       const paymetDataWeekPesos = await getPaymetWeekPesos();
       const paymetDataWeekDolares = await getPaymetWeekDolares();
 
-      // Obtener la semana actual
-      const currentWeek = getWeekNumber(new Date());
-
-      // Filtrar los datos de la semana actual
-      const currentWeekPayments = paymetDataWeekPesos.filter(
-        (payment) => payment.week === currentWeek.toString()
+      // Filtrar datos de la semana actual
+      const currentWeek = new Date().getWeekNumber();
+      setWeekPesos(
+        paymetDataWeekPesos.filter(
+          (payment) => payment.week === currentWeek.toString()
+        )
       );
-      const currentWeekPaymentsDolares = paymetDataWeekDolares.filter(
-        (payment) => payment.week === currentWeek.toString()
+      setWeekDolares(
+        paymetDataWeekDolares.filter(
+          (payment) => payment.week === currentWeek.toString()
+        )
       );
-
-      // Establecer los datos filtrados
-      setWeekPesos(currentWeekPayments);
-      setWeekDolares(currentWeekPaymentsDolares);
     };
 
-    // Ejecutar la función inicialmente
     fetchPaymentData();
 
-    // Crear un intervalo que ejecute la función cada 5 minutos (300,000 milisegundos)
-    const intervalId = setInterval(() => {
-      fetchPaymentData();
-    }, 300000); // 300,000 ms = 5 minutos
-
-    // Limpiar el intervalo cuando el componente se desmonte
+    const intervalId = setInterval(fetchPaymentData, 300000); // Refresca cada 5 minutos
     return () => clearInterval(intervalId);
-  }, [refreshData]); // Dependencia en refreshData
-  // Ejecutar solo cuando el componente se monta
+  }, [refreshData]);
+
+  // Función para obtener el último valor de `totalPayments`
+  const getLastTotalPayment = (array) =>
+    array.length > 0 ? array[array.length - 1].totalPayments : 0;
+
+  // Variables para el último pago semanal en pesos y dólares
+  const lastTotalPayment = getLastTotalPayment(weekPesos);
+  const lastTotalPaymentDolares = getLastTotalPayment(weekDolares);
+
+  // Configuración de gráficos
+  const graficoDiaPesos = {
+    type: "line",
+    height: 220,
+    series: [{ name: "Monto en pesos", data: montoDiaPesos }],
+    options: {
+      ...chartsConfig,
+      colors: ["#0288d1"],
+      stroke: { lineCap: "round" },
+      markers: { size: 5 },
+      xaxis: { ...chartsConfig.xaxis, categories: diasAbreviados },
+    },
+  };
 
   const graficoDiaDolares = {
     type: "line",
     height: 220,
-    series: [
-      {
-        name: "Monto dolares",
-        data: montoDiaDolares,
-      },
-    ],
+    series: [{ name: "Monto en dólares", data: montoDiaDolares }],
     options: {
       ...chartsConfig,
       colors: ["#388e3c"],
-      stroke: {
-        lineCap: "round",
-      },
-      markers: {
-        size: 5,
-      },
-      xaxis: {
-        ...chartsConfig.xaxis,
-        categories: diasAbreviadosD,
-      },
-    },
-  };
-  const graficoDiaPesos = {
-    type: "line",
-    height: 220,
-    series: [
-      {
-        name: "Monto en pesos",
-        data: montoDiaPesos,
-      },
-    ],
-    options: {
-      ...chartsConfig,
-      colors: ["#0288d1"],
-      stroke: {
-        lineCap: "round",
-      },
-      markers: {
-        size: 5,
-      },
-      xaxis: {
-        ...chartsConfig.xaxis,
-        categories: diasAbreviados,
-      },
+      stroke: { lineCap: "round" },
+      markers: { size: 5 },
+      xaxis: { ...chartsConfig.xaxis, categories: diasAbreviadosD },
     },
   };
 
-  const asistenciaDia = {
-    type: "bar",
-    height: 220,
-    series: [
-      {
-        name: "Views",
-        data: [50, 20, 10, 22, 50, 10, 40],
-      },
-    ],
-    options: {
-      ...chartsConfig,
-      colors: "#388e3c",
-      plotOptions: {
-        bar: {
-          columnWidth: "16%",
-          borderRadius: 5,
-        },
-      },
-      xaxis: {
-        ...chartsConfig.xaxis,
-        categories: ["M", "T", "W", "T", "F", "S", "S"],
-      },
-    },
-  };
-  const getLastTotalPayment = (array) => {
-    return array.length > 0 ? array[array.length - 1].totalPayments : null;
-  };
-  const getLastTotalPaymentDolares = (array) => {
-    return array.length > 0 ? array[array.length - 1].totalPayments : null;
-  };
-
-  // Ejemplo de uso
-  const lastTotalPayment = getLastTotalPayment(weekPesos);
-  const lastTotalPaymentDolares = getLastTotalPaymentDolares(weekDolares);
-
-  // Ejemplo de uso
-
+  // Datos para las tarjetas de estadísticas
   const statisticsChartsData = [
     {
       color: "white",
       title: "Ingreso en pesos",
-      description: `Total de ingresos esta semana ${lastTotalPayment} $`,
-      footer: "updated 4 min ago",
+      description: `Total de ingresos esta semana: ${lastTotalPayment} $`,
+      footer: "Actualizado hace 4 minutos",
       chart: graficoDiaPesos,
     },
     {
       color: "white",
-      title: "Ingreso en dolares",
-      description: `Total de ingresos esta semana ${lastTotalPaymentDolares} $`,
-      footer: "just updated",
+      title: "Ingreso en dólares",
+      description: `Total de ingresos esta semana: ${lastTotalPaymentDolares} $`,
+      footer: "Actualizado recientemente",
       chart: graficoDiaDolares,
     },
-    {
-      color: "white",
-      title: "Website View",
-      description: "Last Campaign Performance",
-      footer: "campaign sent 2 days ago",
-      chart: asistenciaDia,
-    },
   ];
+
   return (
     <div className="mt-12">
       <Toaster />
       <CardHeader
         variant="gradient"
         color="gray"
-        className="mb-8 p-6 flex justify-between overflow-visible" // Permite el desbordamiento
+        className="mb-8 p-6 flex justify-between overflow-visible"
       >
         <Typography variant="h6" color="white">
           Clientes diarios
         </Typography>
         <div className="space-x-4 text-black flex relative">
           <Select
-            className="bg-white z-10" // z-index para superponer
+            className="bg-white z-10"
             label="Moneda de pago"
             value={paymentData.currency}
             onChange={(value) =>
@@ -266,16 +184,11 @@ export function Home() {
             }
             required
           >
-            <Option className="text-black font-bold" value="pesos">
-              pesos
-            </Option>
-            <Option className="text-black font-bold" value="dolares">
-              dolares
-            </Option>
+            <Option value="pesos">pesos</Option>
+            <Option value="dolares">dolares</Option>
           </Select>
-
           <Input
-            className="bg-white" // Fondo blanco
+            className="bg-white"
             label="Monto"
             name="amount"
             type="number"
@@ -284,7 +197,7 @@ export function Home() {
             required
           />
           <button
-            className="p-1 m-0 w-16 flex bg-yellow-400 rounded-md "
+            className="p-1 m-0 w-16 flex bg-yellow-400 rounded-md"
             onClick={submitPaymentData}
           >
             <Typography variant="h6" color="black">
@@ -293,7 +206,6 @@ export function Home() {
           </button>
         </div>
       </CardHeader>
-
       <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
