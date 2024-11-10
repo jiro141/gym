@@ -1,4 +1,10 @@
-import { Button, Option, Select, Typography } from "@material-tailwind/react";
+import {
+  Button,
+  Option,
+  Select,
+  Typography,
+  Input,
+} from "@material-tailwind/react";
 import React, { useState } from "react";
 import { updateClient } from "@/Api/controllers/Clients";
 import toast, { Toaster } from "react-hot-toast";
