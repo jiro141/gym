@@ -29,10 +29,12 @@ export function Home() {
     amount: "",
     currency: "",
   });
+
   const handlePaymentDataChange = (e) => {
     const { name, value } = e.target;
     setPaymentData({ ...paymentData, [name]: value });
   };
+
   const [refreshData, setRefreshData] = useState(false);
 
   const submitPaymentData = async () => {
@@ -45,6 +47,8 @@ export function Home() {
         toast.success("Pago realizado con éxito!");
         // Cambia el estado para disparar el useEffect nuevamente
         setRefreshData((prev) => !prev);
+        // Limpia los campos de `paymentData` después de una respuesta exitosa
+        setPaymentData({ amount: "", currency: "" });
       } else {
         throw new Error("Error inesperado al procesar el pago");
       }
