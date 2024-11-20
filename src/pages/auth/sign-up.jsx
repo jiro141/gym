@@ -219,6 +219,7 @@ export function SignUp() {
           onSubmit={(e) => {
             e.preventDefault(); // Previene la recarga de la página
             asistencia(e); // Llama a la función asistencia
+            setIdNumber(""); // Limpia el input después de enviar
           }}
         >
           <div className="mb-1 flex flex-col gap-6">
