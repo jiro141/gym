@@ -120,14 +120,14 @@ export default function UpdateClient({ deleteData, setOpenDelete }) {
             dolares
           </Option>
         </Select>
-        <Input
+        {/* <Input
           label="Monto"
           name="amount"
           type="number"
           value={paymentData.amount}
           onChange={handlePaymentDataChange}
           required
-        />
+        /> */}
       </div>
       <Button
         className="my-4"

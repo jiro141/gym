@@ -46,10 +46,31 @@ export const getPaymetMonthPesos = async () => {
 };
 
 export const createPaymet = async (data) => {
+  if (!data || !data.currency) {
+    throw new Error("Currency is required to create a payment.");
+  }
+
+  // Valores predeterminados por moneda
+  const defaultAmountsByCurrency = {
+    pesos: 40000,
+    dolares: 10,
+  };
+
+  // Asignar monto predeterminado si está vacío
+  if (!data.amount) {
+    data.amount = defaultAmountsByCurrency[data.currency];
+  }
+
+  // Validar que la moneda sea soportada
+  if (!defaultAmountsByCurrency[data.currency]) {
+    throw new Error(`Unsupported currency: ${data.currency}`);
+  }
+
   try {
     const response = await Axios.post(`/payments`, data);
     return response;
   } catch (error) {
-    console.log(error);
+    console.error("Error creating payment:", error.message);
+    throw error; // Lanzar el error para que pueda manejarse fuera de la función
   }
 };

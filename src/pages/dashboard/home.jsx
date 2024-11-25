@@ -33,11 +33,18 @@ export function Home() {
     currency: "",
   });
 
-  // Función para manejar cambios en los campos de pago
-  const handlePaymentDataChange = (e) => {
-    const { name, value } = e.target;
-    setPaymentData({ ...paymentData, [name]: value });
-  };
+  // Actualiza el monto automáticamente al cambiar la moneda
+  useEffect(() => {
+    if (paymentData.currency) {
+      const amountsByCurrency = {
+        pesos: 4000,
+        dolares: 1,
+      };
+
+      const amount = amountsByCurrency[paymentData.currency] || "";
+      setPaymentData((prevData) => ({ ...prevData, amount }));
+    }
+  }, [paymentData.currency]);
 
   // Estado para refrescar datos después de una actualización de pago
   const [refreshData, setRefreshData] = useState(false);
@@ -178,7 +185,7 @@ export function Home() {
             <Option value="pesos">pesos</Option>
             <Option value="dolares">dolares</Option>
           </Select>
-          <Input
+          {/* <Input
             className="bg-white"
             label="Monto"
             name="amount"
@@ -186,7 +193,7 @@ export function Home() {
             value={paymentData.amount}
             onChange={handlePaymentDataChange}
             required
-          />
+          /> */}
           <button
             className="p-1 m-0 w-16 flex bg-yellow-400 rounded-md"
             onClick={submitPaymentData}

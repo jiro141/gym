@@ -200,14 +200,14 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
                   dolares
                 </Option>
               </Select>
-              <Input
+              {/* <Input
                 label="Monto"
                 name="amount"
                 type="number"
                 value={paymentData.amount}
                 onChange={handlePaymentDataChange}
                 required
-              />
+              /> */}
             </div>
             {/* Botón para detectar rostro */}
             <div className=" mt-8 flex  justify-between	">
