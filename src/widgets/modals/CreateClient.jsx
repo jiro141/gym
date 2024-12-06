@@ -30,6 +30,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
   const [paymentData, setPaymentData] = useState({
     amount: "",
     currency: "",
+    clientID: "",
   });
 
   const [faceDetected, setFaceDetected] = useState(false); // Estado para detección de rostro
@@ -44,7 +45,6 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
     const { name, value } = e.target;
     setPaymentData({ ...paymentData, [name]: value });
   };
-  
 
   // Abrir o cerrar el modal de detección de rostro
   const toggleFaceDetection = () => {
@@ -54,27 +54,32 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Primero, intenta crear el pago
-      const paymentResponse = await createPaymet(paymentData);
-      if (paymentResponse) {
-        toast.success("Pago realizado con éxito!");
-  
-        // Si el pago es exitoso, procede a crear el cliente
-        const clientResponse = await postClients(formData);
-        if (clientResponse) {
-          toast.success("Cliente creado con éxito!");
+      // Primero, intenta crear el cliente
+      const clientResponse = await postClients(formData);
+      if (clientResponse.data && clientResponse.data.id) {
+        toast.success("Cliente creado con éxito!");
+
+        // Configurar el id del cliente en los datos del pago
+        const updatedPaymentData = {
+          ...paymentData,
+          clientID: clientResponse.data.id,
+        };
+
+        // Luego, intenta crear el pago con el id del cliente
+        const paymentResponse = await createPaymet(updatedPaymentData);
+        if (paymentResponse) {
+          toast.success("Pago realizado con éxito!");
           setTimeout(() => setOpen(false), 1500);
         } else {
-          throw new Error("Error inesperado al crear el cliente");
+          throw new Error("Error al realizar el pago");
         }
       } else {
-        throw new Error("Error al realizar el pago");
+        throw new Error("Error inesperado al crear el cliente");
       }
     } catch (error) {
       toast.error(error.message || "Error inesperado");
     }
   };
-  
 
   return (
     <div className="max-w-md mx-auto p-8">

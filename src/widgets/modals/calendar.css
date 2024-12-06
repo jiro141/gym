@@ -1,0 +1,51 @@
+/* UpdateClient.module.css */
+
+/* Estilos personalizados para el calendario */
+.custom-calendar {
+  width: 250px; /* Reducir el tamaño del calendario */
+  height: auto;
+  border-radius: 10px; /* Bordes redondeados de 10px */
+
+  /* Estilo para el día seleccionado en forma de círculo */
+  .react-calendar__tile--active {
+    border-radius: 10px !important; /* Hace que el día seleccionado sea un círculo */
+    background-color: #4caf50 !important; /* Color de fondo para el día seleccionado */
+    color: rgb(0, 0, 0) !important; /* Color del texto del día seleccionado */
+  }
+
+  /* Estilo para la fecha hoy */
+  .react-calendar__tile--now {
+    background-color: #ffe609 !important; /* Amarillo para la fecha actual */
+    color: black !important;
+    border-radius: 8px;
+  }
+
+  /* Estilo para cuando el día está en hover */
+  .react-calendar__tile:hover {
+    background-color: #3183c2 !important; /* Un verde claro cuando pasas el mouse */
+    color: black !important;
+    border-radius: 8px;
+  }
+}
+.react-calendar {
+  border: none !important;
+  height: 40vh;
+}
+.react-calendar__navigation {
+  height: 2vh;
+  margin-bottom: 1em;
+}
+.react-calendar__viewContainer {
+  height: 10vh;
+}
+.react-calendar__tile--now {
+    
+    background-color:#ffe609 !important ;
+    color: #000 !important;
+    border-radius: 10px;
+}
+.react-calendar__tile--active{
+    color: #ffffff !important;
+    background-color: #0066b4 !important;
+    border-radius: 10px;
+}
