@@ -74,3 +74,11 @@ export const createPaymet = async (data) => {
     throw error; // Lanzar el error para que pueda manejarse fuera de la función
   }
 };
+export const getGroudPaymet = async () => {
+  try {
+    const response = await Axios.get(`/payments/grouped`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
