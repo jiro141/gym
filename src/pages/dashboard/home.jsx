@@ -213,6 +213,41 @@ export function Home() {
     },
   ];
 
+  const safePagos = Array.isArray(pagos) ? pagos : [];
+
+  // Aplanamos los pagos de todos los clientes en un solo array
+  const allPayments = safePagos.flatMap(grupo => {
+    // Verificamos que 'grupo.payments' sea un array con al menos un pago
+    if (Array.isArray(grupo.payments) && grupo.payments.length > 0) {
+      return grupo.payments.map(payment => ({
+        client: grupo.client,
+        ...payment
+      }));
+    }
+    return []; // Si no hay pagos, devolvemos un array vacío
+  });
+
+  // Ordenamos todos los pagos por fecha (del más reciente al más antiguo)
+  const sortedPayments = allPayments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Estado para la página actual y los pagos por página
+  const [currentPage, setCurrentPage] = useState(1);
+  const pagosPorPagina = 10;
+
+  // Calcular el total de páginas
+  const totalPages = Math.ceil(sortedPayments.length / pagosPorPagina);
+
+  // Función para cambiar de página
+  const changePage = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Obtener los pagos para la página actual
+  const getPaginatedData = () => {
+    const startIndex = (currentPage - 1) * pagosPorPagina;
+    const endIndex = startIndex + pagosPorPagina;
+    return sortedPayments.slice(startIndex, endIndex);
+  };
   return (
     <div className="mt-12">
       <Toaster />
@@ -256,6 +291,26 @@ export function Home() {
           </button>
         </div>
       </CardHeader>
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+        {statisticsChartsData.map((props) => (
+          <StatisticsChart
+            key={props.title}
+            {...props}
+            footer={
+              <Typography
+                variant="small"
+                className="flex items-center font-normal text-blue-gray-600"
+              >
+                <ClockIcon
+                  strokeWidth={2}
+                  className="h-4 w-4 text-blue-gray-400"
+                />
+                &nbsp;{props.footer}
+              </Typography>
+            }
+          />
+        ))}
+      </div>
       <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm mb-3">
         <CardHeader
           floated={false}
@@ -293,141 +348,78 @@ export function Home() {
               </tr>
             </thead>
             <tbody>
-              {pagosFiltrados?.map((grupo, index) => {
-                const { client, payments } = grupo;
-
-                // Aquí generamos la clase para cada fila, asegurando que las últimas filas no tengan borde
+              {getPaginatedData()?.map((payment, index) => {
                 const className = `py-3 px-5 ${
-                  index === pagosFiltrados.length - 1
+                  index === allPayments.length - 1
                     ? ""
                     : "border-b border-blue-gray-50"
                 }`;
 
                 return (
-                  <>
-                    {/* Si el cliente es "visitante", renderizamos todos los pagos */}
-                    {client === "visitante" ? (
-                      payments.map((payment, subIndex) => {
-                        return (
-                          <tr key={`${client}-${subIndex}`}>
-                            <td className={className}>
-                              <div className="flex items-center gap-4">
-                                <Typography
-                                  variant="small"
-                                  color="blue-gray"
-                                  className="font-bold"
-                                >
-                                  {client}{" "}
-                                  {/* Mostramos el nombre del cliente */}
-                                </Typography>
-                              </div>
-                            </td>
-
-                            <td className={className}>
-                              <div className="w-10/12">
-                                <Typography
-                                  variant="small"
-                                  className="mb-1 block text-x font-medium text-blue-gray-600"
-                                >
-                                  {new Date(payment.createdAt).toLocaleString()}{" "}
-                                  {/* Mostramos la fecha del pago */}
-                                </Typography>
-                              </div>
-                            </td>
-
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-x font-medium text-blue-gray-600"
-                              >
-                                {payment.currency} {/* Mostramos la moneda */}
-                              </Typography>
-                            </td>
-
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-x font-medium text-green-600"
-                              >
-                               $ {payment.amount} {/* Mostramos el monto */}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      // Si no es "visitante", solo mostramos el pago más reciente
-                      <tr key={client}>
-                        <td className={className}>
-                          <div className="flex items-center gap-4">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-bold"
-                            >
-                              {client} {/* Mostramos el nombre del cliente */}
-                            </Typography>
-                          </div>
-                        </td>
-
-                        <td className={className}>
-                          <div className="w-10/12">
-                            <Typography
-                              variant="small"
-                              className="mb-1 block text-x font-medium text-blue-gray-600"
-                            >
-                              {new Date(payments[0].createdAt).toLocaleString()}{" "}
-                              {/* Mostramos la fecha del pago */}
-                            </Typography>
-                          </div>
-                        </td>
-
-                        <td className={className}>
-                          <Typography
-                            variant="small"
-                            className="text-x font-medium text-blue-gray-600"
-                          >
-                            {payments[0].currency} {/* Mostramos la moneda */}
-                          </Typography>
-                        </td>
-
-                        <td className={className}>
-                          <Typography
-                            variant="small"
-                            className="text-x font-medium text-green-600"
-                          >
-                          $  {payments[0].amount} {/* Mostramos el monto */}
-                          </Typography>
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                  <tr key={`${payment.client}-${index}`}>
+                    <td className={className}>
+                      <div className="flex items-center gap-4">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-bold"
+                        >
+                          {payment.client}
+                        </Typography>
+                      </div>
+                    </td>
+                    <td className={className}>
+                      <div className="w-10/12">
+                        <Typography
+                          variant="small"
+                          className="mb-1 block text-x font-medium text-blue-gray-600"
+                        >
+                          {new Date(payment.createdAt).toLocaleString()}
+                        </Typography>
+                      </div>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        variant="small"
+                        className="text-x font-medium text-blue-gray-600"
+                      >
+                        {payment.currency}
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        variant="small"
+                        className="text-x font-medium text-green-600"
+                      >
+                        $ {payment.amount}
+                      </Typography>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
           </table>
+          <div className="flex justify-center space-x-4 mt-4">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              disabled={currentPage === 1}
+              onClick={() => changePage(currentPage - 1)}
+            >
+              Anterior
+            </button>
+            <span className="flex items-center">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              disabled={currentPage === totalPages}
+              onClick={() => changePage(currentPage + 1)}
+            >
+              Siguiente
+            </button>
+          </div>
         </CardBody>
       </Card>
-      {/* <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        {statisticsChartsData.map((props) => (
-          <StatisticsChart
-            key={props.title}
-            {...props}
-            footer={
-              <Typography
-                variant="small"
-                className="flex items-center font-normal text-blue-gray-600"
-              >
-                <ClockIcon
-                  strokeWidth={2}
-                  className="h-4 w-4 text-blue-gray-400"
-                />
-                &nbsp;{props.footer}
-              </Typography>
-            }
-          />
-        ))}
-      </div> */}
     </div>
   );
 }
