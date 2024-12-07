@@ -66,7 +66,7 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         };
 
         // Luego, intenta crear el pago con el id del cliente
-        const paymentResponse = await createPaymet(updatedPaymentData);
+        const paymentResponse = await createPaymet(updatedPaymentData,formData.membershipType);
         if (paymentResponse) {
           toast.success("Pago realizado con éxito!");
           setTimeout(() => setOpen(false), 1500);

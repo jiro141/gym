@@ -45,7 +45,7 @@ export default function UpdateClient({ deleteData, setOpenDelete }) {
         };
 
         // Luego, intenta crear el pago con el id del cliente
-        const paymentResponse = await createPaymet(updatedPaymentData);
+        const paymentResponse = await createPaymet(updatedPaymentData,formData.membershipType);
         if (paymentResponse) {
           toast.success("Pago realizado con éxito!");
 

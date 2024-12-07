@@ -45,35 +45,34 @@ export const getPaymetMonthPesos = async () => {
   }
 };
 
-export const createPaymet = async (data) => {
+
+export const createPaymet = async (data, type) => {
   if (!data || !data.currency) {
-    throw new Error("Currency is required to create a payment.");
+    throw new Error("Currency and payment type are required.");
   }
 
-  // Valores predeterminados por moneda
-  const defaultAmountsByCurrency = {
-    pesos: 40000,
-    dolares: 10,
-  };
-
-  // Asignar monto predeterminado si está vacío
+  // Asignación del monto predeterminado según la moneda y tipo
   if (!data.amount) {
-    data.amount = defaultAmountsByCurrency[data.currency];
-  }
-
-  // Validar que la moneda sea soportada
-  if (!defaultAmountsByCurrency[data.currency]) {
-    throw new Error(`Unsupported currency: ${data.currency}`);
+    if (data.currency === "pesos") {
+      // Si es "pesos", asignamos según el tipo de pago
+      data.amount = (type === "mensual") ? 40000 : 20000; // Mensual: 40,000, Semanal: 20,000
+    } else if (data.currency === "dolares") {
+      // Si es "dólares", asignamos según el tipo de pago
+      data.amount = (type === "mensual") ? 10 : 5; // Mensual: 10, Semanal: 5
+    } else {
+      throw new Error("Unsupported currency.");
+    }
   }
 
   try {
-    const response = await Axios.post(`/payments`, data);
+    const response = await Axios.post("/payments", data);
     return response;
   } catch (error) {
     console.error("Error creating payment:", error.message);
-    throw error; // Lanzar el error para que pueda manejarse fuera de la función
+    throw error;
   }
 };
+
 export const getGroudPaymet = async () => {
   try {
     const response = await Axios.get(`/payments/grouped`);
