@@ -31,9 +31,8 @@ export function Home() {
   const [weekPesos, setWeekPesos] = useState([]);
   const [weekDolares, setWeekDolares] = useState([]);
   const [pagos, setPagos] = useState();
-  //filtros de pagos...
   const [pagosFiltrados, setPagosFiltrados] = useState([]);
-
+  const [terminoAFiltrar, setTerminoAFiltrar] = useState("");
   // Estado para los datos de pago actuales
   const [paymentData, setPaymentData] = useState({
     amount: "",
@@ -248,11 +247,23 @@ export function Home() {
 
   // Obtener los pagos para la página actual
   const getPaginatedData = () => {
+    const data = terminoAFiltrar ? pagosFiltrados : sortedPayments; // Usa datos filtrados si hay filtro activo
     const startIndex = (currentPage - 1) * pagosPorPagina;
     const endIndex = startIndex + pagosPorPagina;
-    console.log("Estoy aca... :", sortedPayments.slice(startIndex, endIndex));
-    return sortedPayments.slice(startIndex, endIndex);
+    return data.slice(startIndex, endIndex);
   };
+
+  const filtrarPagosPorNombres = (e) => {
+    const terminoDeBusqueda = e.target.value.toLowerCase(); // Asegúrate de comparar en minúsculas
+    setTerminoAFiltrar(terminoDeBusqueda);
+
+    const clientesFiltradosSegunElNombre = sortedPayments.filter((cliente) =>
+      cliente.client.toLowerCase().includes(terminoDeBusqueda)
+    );
+
+    setPagosFiltrados(clientesFiltradosSegunElNombre);
+  };
+
   return (
     <div className="mt-12">
       <Toaster />
@@ -335,19 +346,11 @@ export function Home() {
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <form className="px-10 ">
-            <label htmlFor="nombreClienteInput">Filtrar por:</label>
+            <label htmlFor="nombreClienteInput">Filtrar por nombre:</label>
             <input
-              list="nombreCliente"
-              id="nombreClienteInput"
-              placeholder="buscar por nombre"
-            />
-            <datalist id="nombreCliente">
-              <option value="nombre">Nombre del clienten</option>
-              <option value="fecha">Fecha</option>
-            </datalist>
-            <input
-              className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              className="w-full  placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
               type="text"
+              onChange={filtrarPagosPorNombres}
             />
           </form>
 
@@ -370,7 +373,7 @@ export function Home() {
               </tr>
             </thead>
             <tbody>
-              {getPaginatedData()?.map((payment, index) => {
+              {getPaginatedData().map((payment, index) => {
                 const className = `py-3 px-5 ${
                   index === allPayments.length - 1
                     ? ""
