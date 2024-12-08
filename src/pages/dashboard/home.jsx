@@ -31,7 +31,9 @@ export function Home() {
   const [weekPesos, setWeekPesos] = useState([]);
   const [weekDolares, setWeekDolares] = useState([]);
   const [pagos, setPagos] = useState();
+  //filtros de pagos...
   const [pagosFiltrados, setPagosFiltrados] = useState([]);
+
   // Estado para los datos de pago actuales
   const [paymentData, setPaymentData] = useState({
     amount: "",
@@ -216,19 +218,21 @@ export function Home() {
   const safePagos = Array.isArray(pagos) ? pagos : [];
 
   // Aplanamos los pagos de todos los clientes en un solo array
-  const allPayments = safePagos.flatMap(grupo => {
+  const allPayments = safePagos.flatMap((grupo) => {
     // Verificamos que 'grupo.payments' sea un array con al menos un pago
     if (Array.isArray(grupo.payments) && grupo.payments.length > 0) {
-      return grupo.payments.map(payment => ({
+      return grupo.payments.map((payment) => ({
         client: grupo.client,
-        ...payment
+        ...payment,
       }));
     }
     return []; // Si no hay pagos, devolvemos un array vacío
   });
 
   // Ordenamos todos los pagos por fecha (del más reciente al más antiguo)
-  const sortedPayments = allPayments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const sortedPayments = allPayments.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
   // Estado para la página actual y los pagos por página
   const [currentPage, setCurrentPage] = useState(1);
@@ -246,6 +250,7 @@ export function Home() {
   const getPaginatedData = () => {
     const startIndex = (currentPage - 1) * pagosPorPagina;
     const endIndex = startIndex + pagosPorPagina;
+    console.log("Estoy aca... :", sortedPayments.slice(startIndex, endIndex));
     return sortedPayments.slice(startIndex, endIndex);
   };
   return (
@@ -329,6 +334,23 @@ export function Home() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+          <form className="px-10 ">
+            <label htmlFor="nombreClienteInput">Filtrar por:</label>
+            <input
+              list="nombreCliente"
+              id="nombreClienteInput"
+              placeholder="buscar por nombre"
+            />
+            <datalist id="nombreCliente">
+              <option value="nombre">Nombre del clienten</option>
+              <option value="fecha">Fecha</option>
+            </datalist>
+            <input
+              className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              type="text"
+            />
+          </form>
+
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
