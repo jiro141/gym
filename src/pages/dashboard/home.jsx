@@ -21,6 +21,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { chartsConfig } from "@/configs";
 import { StatisticsChart } from "@/widgets/charts";
+import { use } from "react";
 
 export function Home() {
   // Estados para almacenar datos diarios y semanales de pesos y dólares
@@ -31,9 +32,12 @@ export function Home() {
   const [weekPesos, setWeekPesos] = useState([]);
   const [weekDolares, setWeekDolares] = useState([]);
   const [pagos, setPagos] = useState();
+  //Estados filtro  de los pagos by cliente
   const [pagosFiltrados, setPagosFiltrados] = useState([]);
   const [terminoAFiltrar, setTerminoAFiltrar] = useState("");
-  // Estado para los datos de pago actuales
+  // Estado filtro by date
+  const [filterDesde, setFilterDesde] = useState(0);
+  const [filterHasta, setFilterHasta] = useState(0);
   const [paymentData, setPaymentData] = useState({
     amount: "",
     currency: "",
@@ -50,7 +54,9 @@ export function Home() {
       const amount = amountsByCurrency[paymentData.currency] || "";
       setPaymentData((prevData) => ({ ...prevData, amount }));
     }
-  }, [paymentData.currency]);
+
+    filtrarPagosPorFecha();
+  }, [filterDesde, filterHasta, paymentData.currency]);
 
   // Estado para refrescar datos después de una actualización de pago
   const [refreshData, setRefreshData] = useState(false);
@@ -229,9 +235,33 @@ export function Home() {
   });
 
   // Ordenamos todos los pagos por fecha (del más reciente al más antiguo)
-  const sortedPayments = allPayments.sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  const sortedPayments = allPayments
+    .map((payment) => ({
+      ...payment,
+      // Si 'createdAt' no es nulo, formateamos la fecha y hora
+      createdAt: payment.createdAt
+        ? (() => {
+            const date = new Date(payment.createdAt);
+            const formattedDate = date.toLocaleDateString("es-ES", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+            const formattedTime = date.toLocaleTimeString("es-ES", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            });
+            return `${formattedDate} ${formattedTime}`;
+          })()
+        : null, // Si 'createdAt' es nulo, lo dejamos igual
+    }))
+    .sort((a, b) => {
+      // Ordenamos las fechas, considerando que algunas pueden ser nulas
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0); // Fechas nulas se consideran antiguas
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA; // Orden descendente
+    });
 
   // Estado para la página actual y los pagos por página
   const [currentPage, setCurrentPage] = useState(1);
@@ -247,9 +277,20 @@ export function Home() {
 
   // Obtener los pagos para la página actual
   const getPaginatedData = () => {
-    const data = terminoAFiltrar ? pagosFiltrados : sortedPayments; // Usa datos filtrados si hay filtro activo
+    let data = 0;
+    if (terminoAFiltrar || filterDesde || filterHasta) {
+      //data se convierte en el areglo filtrado
+      data = pagosFiltrados;
+
+      //setear a la pagina 1
+    } else {
+      //data s econvierte en el arreglo sin filtro
+      data = sortedPayments;
+    }
+
     const startIndex = (currentPage - 1) * pagosPorPagina;
     const endIndex = startIndex + pagosPorPagina;
+
     return data.slice(startIndex, endIndex);
   };
 
@@ -262,6 +303,51 @@ export function Home() {
     );
 
     setPagosFiltrados(clientesFiltradosSegunElNombre);
+    //seteamos ala pagina uno para ver el fitro
+    setCurrentPage(1);
+  };
+  //controla el filtro de fecha
+  const filtrarPagosPorFecha = () => {
+    // Convertir filtros a fechas (si existen)
+    const desde = filterDesde ? new Date(filterDesde) : null;
+    const hasta = filterHasta ? new Date(filterHasta) : null;
+
+    console.log("desde = ", desde);
+    console.log("hasta= ", hasta);
+
+    const pagosFiltradosPorFecha = sortedPayments.filter((payment) => {
+      const fechaPago = new Date(payment.createdAt);
+      console.log("FEHCA DE PAGA PARA ESTE CLINETE  = ", fechaPago);
+      // Validar ambos filtros
+      if (desde && hasta) {
+        if (desde == hasta) {
+          return desde;
+        }
+
+        return fechaPago >= desde && fechaPago <= hasta;
+      }
+
+      // Validar solo el filtro "Desde"
+      if (desde) {
+        return fechaPago >= desde;
+      }
+
+      // Validar solo el filtro "Hasta"
+      if (hasta) {
+        return fechaPago <= hasta;
+      }
+      // Si no hay filtros, incluir todos los pagos
+      return true;
+    });
+    setCurrentPage(1);
+    setPagosFiltrados(pagosFiltradosPorFecha);
+  };
+
+  // Función para formatear una fecha yyyy-mm-dd a dd/mm/yyyy
+  const formatDateToDDMMYYYY = (value) => {
+    if (!value) return "";
+    const [year, month, day] = value.split("-");
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -345,14 +431,44 @@ export function Home() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <form className="px-10 ">
-            <label htmlFor="nombreClienteInput">Filtrar por nombre:</label>
+          <form className="px-5 flex flex-row items-center justify-start gap-3 mb-4">
+            {/*Joan inserto esto xD */}
+            <label htmlFor="nombreClienteInput" className="">
+              Filtrar por Cliente
+            </label>
             <input
-              className="w-full  placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              id="nombreClienteInput"
+              className=" placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
               type="text"
               onChange={filtrarPagosPorNombres}
+              placeholder="Nombre"
+            />
+            <label htmlFor="fechaDesde">Desde</label>
+            <input
+              className="border border-slate-200 rounded-md"
+              type="date"
+              name="fechaDesde"
+              id="fechaDesde"
+              onChange={(e) => {
+                const rawValue = e.target.value; // Valor en formato yyyy-mm-dd
+                const formattedValue = formatDateToDDMMYYYY(rawValue);
+                setFilterDesde(formattedValue); // Guardamos el valor en formato dd/mm/yyyy
+              }}
+            />
+            <label htmlFor="fechaHasta">Hasta</label>
+            <input
+              className="border border-slate-200 rounded-md"
+              type="date"
+              name="fechaHasta"
+              id="fechaHasta"
+              onChange={(e) => {
+                const rawValue = e.target.value; // Valor en formato yyyy-mm-dd
+                const formattedValue = formatDateToDDMMYYYY(rawValue);
+                setFilterHasta(formattedValue); // Guardamos el valor en formato dd/mm/yyyy
+              }}
             />
           </form>
+          {console.log(filterDesde)}
 
           <table className="w-full min-w-[640px] table-auto">
             <thead>
@@ -373,7 +489,7 @@ export function Home() {
               </tr>
             </thead>
             <tbody>
-              {getPaginatedData().map((payment, index) => {
+              {getPaginatedData()?.map((payment, index) => {
                 const className = `py-3 px-5 ${
                   index === allPayments.length - 1
                     ? ""
