@@ -285,13 +285,12 @@ export function Home() {
       //setear a la pagina 1
     } else {
       //data s econvierte en el arreglo sin filtro
+      const startIndex = (currentPage - 1) * pagosPorPagina;
+      const endIndex = startIndex + pagosPorPagina;
       data = sortedPayments;
+      return data.slice(startIndex, endIndex);
     }
-
-    const startIndex = (currentPage - 1) * pagosPorPagina;
-    const endIndex = startIndex + pagosPorPagina;
-
-    return data.slice(startIndex, endIndex);
+    return data;
   };
 
   const filtrarPagosPorNombres = (e) => {
@@ -308,22 +307,24 @@ export function Home() {
   };
   //controla el filtro de fecha
   const filtrarPagosPorFecha = () => {
+    if (filterDesde == filterHasta && filterDesde != 0 && filterHasta != 0) {
+      console.log(filterHasta);
+      //COmo es igual no queda espacio para ningun registro entre los dias
+      //Toca sumar un dia a la fecha hasta
+      const [day, month, year] = filterHasta.split("/");
+      const sumarDia = parseInt(day) + 1;
+      console.log(sumarDia);
+      setFilterHasta(`${sumarDia}/${month}/${year}`);
+    }
+
     // Convertir filtros a fechas (si existen)
     const desde = filterDesde ? new Date(filterDesde) : null;
     const hasta = filterHasta ? new Date(filterHasta) : null;
 
-    console.log("desde = ", desde);
-    console.log("hasta= ", hasta);
-
     const pagosFiltradosPorFecha = sortedPayments.filter((payment) => {
       const fechaPago = new Date(payment.createdAt);
-      console.log("FEHCA DE PAGA PARA ESTE CLINETE  = ", fechaPago);
       // Validar ambos filtros
       if (desde && hasta) {
-        if (desde == hasta) {
-          return desde;
-        }
-
         return fechaPago >= desde && fechaPago <= hasta;
       }
 
@@ -340,6 +341,7 @@ export function Home() {
       return true;
     });
     setCurrentPage(1);
+    console.log("YA ESTAN FILTRADOS ", pagosFiltradosPorFecha);
     setPagosFiltrados(pagosFiltradosPorFecha);
   };
 
@@ -443,6 +445,7 @@ export function Home() {
               onChange={filtrarPagosPorNombres}
               placeholder="Nombre"
             />
+            Siguiente
             <label htmlFor="fechaDesde">Desde</label>
             <input
               className="border border-slate-200 rounded-md"
@@ -468,7 +471,6 @@ export function Home() {
               }}
             />
           </form>
-          {console.log(filterDesde)}
 
           <table className="w-full min-w-[640px] table-auto">
             <thead>
