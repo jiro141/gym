@@ -8,7 +8,14 @@ import {
 import PropTypes from "prop-types";
 import Chart from "react-apexcharts";
 
-export function StatisticsChart({ color, chart, title, description, footer }) {
+export function StatisticsChart({
+  color,
+  chart,
+  title,
+  description,
+  totalDias,
+  footer,
+}) {
   return (
     <Card className="border border-blue-gray-100 shadow-sm">
       <Typography className="px-6 pt-4" variant="h5" color="blue-gray">
@@ -25,6 +32,9 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
       <CardBody className="px-6 pt-0">
         <Typography variant="h6" className="font-normal text-blue-gray-900">
           {description}
+        </Typography>
+        <Typography variant="h6" className="font-normal text-blue-gray-900">
+          {totalDias}
         </Typography>
       </CardBody>
       {footer && (

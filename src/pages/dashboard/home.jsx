@@ -42,7 +42,10 @@ export function Home() {
     amount: "",
     currency: "",
   });
-
+  //suma total en pesos del dia de hoy
+  const [totalPesosHoy, setTotalPesosHoy] = useState(0);
+  //today
+  const [hoy, setHoy] = useState(null);
   // Actualiza el monto automáticamente al cambiar la moneda
   useEffect(() => {
     if (paymentData.currency) {
@@ -114,6 +117,70 @@ export function Home() {
 
         // Actualizamos el estado de pagos filtrados
         setPagosFiltrados(pagosOrganizados);
+
+        //calculamos la suma del dia de hoy
+        //sacamos solo la fecha y el monto de pago...
+        const nestedArray = pagosOrganizados.map((cliente) => cliente.payments);
+        //aplanamos el arreglo para sacar solo los pagos
+        const flattenedArray = nestedArray.reduce((acc, curr) => {
+          return acc.concat(
+            curr.map((item) => ({
+              date: item.createdAt,
+              pago: item.amount,
+            }))
+          );
+        }, []);
+
+        //sacamos solos los pagos que correspondan al dia de hoy
+        function obtenerElementosDeHoy(arrayDeObjetos) {
+          const hoy = new Date();
+          const anioHoy = hoy.getFullYear();
+          const mesHoy = hoy.getMonth() + 1; // Los meses en JavaScript comienzan en 0
+          const diaHoy = hoy.getDate();
+
+          return arrayDeObjetos.filter((objeto) => {
+            const fechaObjeto = new Date(objeto.date);
+            const anioObjeto = fechaObjeto.getFullYear();
+            const mesObjeto = fechaObjeto.getMonth() + 1;
+            const diaObjeto = fechaObjeto.getDate();
+
+            return (
+              anioObjeto === anioHoy &&
+              mesObjeto === mesHoy &&
+              diaObjeto === diaHoy
+            );
+          });
+        }
+        //sumamos los pagos solo de hoy
+        const sumPagosHoy = obtenerElementosDeHoy(flattenedArray).reduce(
+          (accmonto, monto) => accmonto + monto.pago,
+          0
+        );
+        //console.log("ESTO SON TODOS LOS PAGOS: ", flattenedArray);
+        //console.log(sumPagosHoy);
+        //seteamos el dia de hoy
+        function obtenerFechaYDia() {
+          const fecha = new Date();
+
+          const diasSemana = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+          ];
+          const diaSemana = diasSemana[fecha.getDay()];
+
+          const dia = fecha.getDate().toString().padStart(2, "0");
+          const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+          const anio = fecha.getFullYear();
+
+          return `${diaSemana}`;
+        }
+        setHoy(obtenerFechaYDia);
+        setTotalPesosHoy(sumPagosHoy);
       } catch (error) {
         console.error("Error cargando los pagos:", error);
       }
@@ -207,6 +274,7 @@ export function Home() {
       color: "white",
       title: "Ingreso en pesos",
       description: `Total de ingresos esta semana: ${lastTotalPayment} $`,
+      totalDias: `Total de ingresos hoy ${hoy} : ${totalPesosHoy}`,
       footer: "Actualizado hace 4 minutos",
       chart: graficoDiaPesos,
     },
@@ -340,7 +408,7 @@ export function Home() {
       return true;
     });
     setCurrentPage(1);
-    console.log("YA ESTAN FILTRADOS ", pagosFiltradosPorFecha);
+    //console.log("YA ESTAN FILTRADOS ", pagosFiltradosPorFecha);
     setPagosFiltrados(pagosFiltradosPorFecha);
   };
 
