@@ -201,7 +201,6 @@ export function Home() {
       xaxis: { ...chartsConfig.xaxis, categories: diasAbreviadosD },
     },
   };
-
   // Datos para las tarjetas de estadísticas
   const statisticsChartsData = [
     {
@@ -440,12 +439,11 @@ export function Home() {
             </label>
             <input
               id="nombreClienteInput"
-              className=" placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              className="placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
               type="text"
               onChange={filtrarPagosPorNombres}
               placeholder="Nombre"
             />
-            Siguiente
             <label htmlFor="fechaDesde">Desde</label>
             <input
               className="border border-slate-200 rounded-md"
