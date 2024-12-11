@@ -42,7 +42,10 @@ export function Home() {
     amount: "",
     currency: "",
   });
-
+  //suma total en pesos del dia de hoy
+  const [totalPesosHoy, setTotalPesosHoy] = useState(0);
+  //today
+  const [hoy, setHoy] = useState(null);
   // Actualiza el monto automáticamente al cambiar la moneda
   useEffect(() => {
     if (paymentData.currency) {
@@ -114,6 +117,70 @@ export function Home() {
 
         // Actualizamos el estado de pagos filtrados
         setPagosFiltrados(pagosOrganizados);
+
+        //calculamos la suma del dia de hoy
+        //sacamos solo la fecha y el monto de pago...
+        const nestedArray = pagosOrganizados.map((cliente) => cliente.payments);
+        //aplanamos el arreglo para sacar solo los pagos
+        const flattenedArray = nestedArray.reduce((acc, curr) => {
+          return acc.concat(
+            curr.map((item) => ({
+              date: item.createdAt,
+              pago: item.amount,
+            }))
+          );
+        }, []);
+
+        //sacamos solos los pagos que correspondan al dia de hoy
+        function obtenerElementosDeHoy(arrayDeObjetos) {
+          const hoy = new Date();
+          const anioHoy = hoy.getFullYear();
+          const mesHoy = hoy.getMonth() + 1; // Los meses en JavaScript comienzan en 0
+          const diaHoy = hoy.getDate();
+
+          return arrayDeObjetos.filter((objeto) => {
+            const fechaObjeto = new Date(objeto.date);
+            const anioObjeto = fechaObjeto.getFullYear();
+            const mesObjeto = fechaObjeto.getMonth() + 1;
+            const diaObjeto = fechaObjeto.getDate();
+
+            return (
+              anioObjeto === anioHoy &&
+              mesObjeto === mesHoy &&
+              diaObjeto === diaHoy
+            );
+          });
+        }
+        //sumamos los pagos solo de hoy
+        const sumPagosHoy = obtenerElementosDeHoy(flattenedArray).reduce(
+          (accmonto, monto) => accmonto + monto.pago,
+          0
+        );
+        //console.log("ESTO SON TODOS LOS PAGOS: ", flattenedArray);
+        //console.log(sumPagosHoy);
+        //seteamos el dia de hoy
+        function obtenerFechaYDia() {
+          const fecha = new Date();
+
+          const diasSemana = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+          ];
+          const diaSemana = diasSemana[fecha.getDay()];
+
+          const dia = fecha.getDate().toString().padStart(2, "0");
+          const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+          const anio = fecha.getFullYear();
+
+          return `${diaSemana}`;
+        }
+        setHoy(obtenerFechaYDia);
+        setTotalPesosHoy(sumPagosHoy);
       } catch (error) {
         console.error("Error cargando los pagos:", error);
       }
@@ -201,13 +268,13 @@ export function Home() {
       xaxis: { ...chartsConfig.xaxis, categories: diasAbreviadosD },
     },
   };
-
   // Datos para las tarjetas de estadísticas
   const statisticsChartsData = [
     {
       color: "white",
       title: "Ingreso en pesos",
       description: `Total de ingresos esta semana: ${lastTotalPayment} $`,
+      totalDias: `Total de ingresos hoy ${hoy} : ${totalPesosHoy}`,
       footer: "Actualizado hace 4 minutos",
       chart: graficoDiaPesos,
     },
@@ -285,13 +352,12 @@ export function Home() {
       //setear a la pagina 1
     } else {
       //data s econvierte en el arreglo sin filtro
+      const startIndex = (currentPage - 1) * pagosPorPagina;
+      const endIndex = startIndex + pagosPorPagina;
       data = sortedPayments;
+      return data.slice(startIndex, endIndex);
     }
-
-    const startIndex = (currentPage - 1) * pagosPorPagina;
-    const endIndex = startIndex + pagosPorPagina;
-
-    return data.slice(startIndex, endIndex);
+    return data;
   };
 
   const filtrarPagosPorNombres = (e) => {
@@ -308,22 +374,24 @@ export function Home() {
   };
   //controla el filtro de fecha
   const filtrarPagosPorFecha = () => {
+    if (filterDesde == filterHasta && filterDesde != 0 && filterHasta != 0) {
+      console.log(filterHasta);
+      //COmo es igual no queda espacio para ningun registro entre los dias
+      //Toca sumar un dia a la fecha hasta
+      const [day, month, year] = filterHasta.split("/");
+      const sumarDia = parseInt(day) + 1;
+      console.log(sumarDia);
+      setFilterHasta(`${sumarDia}/${month}/${year}`);
+    }
+
     // Convertir filtros a fechas (si existen)
     const desde = filterDesde ? new Date(filterDesde) : null;
     const hasta = filterHasta ? new Date(filterHasta) : null;
 
-    console.log("desde = ", desde);
-    console.log("hasta= ", hasta);
-
     const pagosFiltradosPorFecha = sortedPayments.filter((payment) => {
       const fechaPago = new Date(payment.createdAt);
-      console.log("FEHCA DE PAGA PARA ESTE CLINETE  = ", fechaPago);
       // Validar ambos filtros
       if (desde && hasta) {
-        if (desde == hasta) {
-          return desde;
-        }
-
         return fechaPago >= desde && fechaPago <= hasta;
       }
 
@@ -340,6 +408,7 @@ export function Home() {
       return true;
     });
     setCurrentPage(1);
+    //console.log("YA ESTAN FILTRADOS ", pagosFiltradosPorFecha);
     setPagosFiltrados(pagosFiltradosPorFecha);
   };
 
@@ -438,7 +507,7 @@ export function Home() {
             </label>
             <input
               id="nombreClienteInput"
-              className=" placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              className="placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
               type="text"
               onChange={filtrarPagosPorNombres}
               placeholder="Nombre"
@@ -468,7 +537,6 @@ export function Home() {
               }}
             />
           </form>
-          {console.log(filterDesde)}
 
           <table className="w-full min-w-[640px] table-auto">
             <thead>

@@ -4,12 +4,14 @@ import { Asistencia } from "@/Api/controllers/Asistencia";
 import { useState, useRef, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import * as faceapi from "face-api.js";
+import { CSSTransition } from "react-transition-group";
 
 export function SignUp() {
   const [idNumber, setIdNumber] = useState("");
   const [faceDescriptor, setFaceDescriptor] = useState(null);
   const [lastSentDescriptor, setLastSentDescriptor] = useState(null);
   const [asistenciaInfo, setAsistenciaInfo] = useState(null); // Estado para la información de asistencia
+  const [mostrarCard, setMostrarcard] = useState(false);
   const videoRef = useRef(null);
   const today = new Date();
   const formattedDate = today.toLocaleDateString("es-ES", {
@@ -74,6 +76,8 @@ export function SignUp() {
           }),
           isVigente,
         });
+        //mostramos card con la informacion del usuario
+        setMostrarcard(true);
       } else {
         toast.error("No se encontró el cliente.");
       }
@@ -85,6 +89,19 @@ export function SignUp() {
       }
     }
   };
+  //controla el timer de la card
+  useEffect(() => {
+    let timer;
+    if (mostrarCard) {
+      // Iniciar el temporizador cuando mostrarCard sea true
+      timer = setTimeout(() => {
+        setMostrarcard(false);
+      }, 3000); // 3000ms = 3 segundos
+    }
+
+    // Limpiar el temporizador si el componente se desmonta o si mostrarCard cambia
+    return () => clearTimeout(timer);
+  }, [mostrarCard]);
 
   return (
     <section className="m-8 flex">
@@ -148,41 +165,46 @@ export function SignUp() {
           Regresar
         </Button>
       </div>
-
-      {asistenciaInfo && (
+      {/*Para genera la transcicion suabe se necesita usar CSSTransition */}
+      <CSSTransition
+        in={mostrarCard} // Controla si la animación "entra" o "sale"
+        timeout={300} // Duración de la animación
+        classNames="my-node" // Clases CSS para las transiciones
+        unmountOnExit // Desmonta el componente después de la animación de salida
+      >
         <div
           className={`fixed top-[80%] lg:left-[25%] lg:top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 shadow-lg rounded-lg p-6 w-96 z-50 ${
-            asistenciaInfo.isVigente ? "bg-green-50" : "bg-red-50"
+            asistenciaInfo?.isVigente ? "bg-green-50" : "bg-red-50"
           } border`}
         >
           <h3
             className={`text-xl font-semibold mb-2 ${
-              asistenciaInfo.isVigente ? "text-green-800" : "text-red-800"
+              asistenciaInfo?.isVigente ? "text-green-800" : "text-red-800"
             }`}
           >
-            {asistenciaInfo.isVigente
-              ? `Bienvenido, ${asistenciaInfo.name}!`
-              : `Atención, ${asistenciaInfo.name}!`}
+            {asistenciaInfo?.isVigente
+              ? `Bienvenido, ${asistenciaInfo?.name}!`
+              : `Atención, ${asistenciaInfo?.name}!`}
           </h3>
           <p
             className={`text-gray-600 ${
-              asistenciaInfo.isVigente ? "" : "text-red-600"
+              asistenciaInfo?.isVigente ? "" : "text-red-600"
             }`}
           >
-            {asistenciaInfo.isVigente
-              ? `Su membresía está vigente hasta el ${asistenciaInfo.formattedExpiration}.`
-              : `Su membresía venció el ${asistenciaInfo.formattedExpiration}. Por favor, renueve.`}
+            {asistenciaInfo?.isVigente
+              ? `Su membresía está vigente hasta el ${asistenciaInfo?.formattedExpiration}.`
+              : `Su membresía venció el ${asistenciaInfo?.formattedExpiration}. Por favor, renueve.`}
           </p>
           <Button
             className={`mt-4 w-full ${
-              asistenciaInfo.isVigente ? "bg-green-500" : "bg-red-500"
+              asistenciaInfo?.isVigente ? "bg-green-500" : "bg-red-500"
             } text-white`}
-            onClick={() => setAsistenciaInfo(null)}
+            onClick={() => setMostrarcard(false)}
           >
             Cerrar
           </Button>
         </div>
-      )}
+      </CSSTransition>
     </section>
   );
 }
