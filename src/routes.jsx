@@ -33,7 +33,7 @@ export const routes = [
       },
       {
         icon: <IoIosFitness {...icon} />,
-        name: "Runtinas",
+        name: "Rutinas",
         path: "/Runtinas",
         element: <Rutinas />,
       },
