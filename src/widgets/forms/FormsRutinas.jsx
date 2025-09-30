@@ -140,7 +140,7 @@ export default function FormRutinas({
     setTimeout(() => {
       setActiveStep(0);
       setPdfBlob(null);
-    }, 4000);
+    }, 7000);
   };
 
   // 🔔 Forzar descarga ignorando advertencias
