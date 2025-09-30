@@ -81,7 +81,7 @@ export default function FormRutinas({
   const fetchRoutine = async (force = false) => {
     try {
       const res = await fetch(
-        "https://0h9v04f2-5000.use2.devtunnels.ms/api/rutinas",
+        "http://localhost:5000/api/rutinas",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
