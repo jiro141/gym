@@ -1,66 +1,34 @@
 import { useNavigate } from "react-router-dom";
-import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { Input, Button, Typography } from "@material-tailwind/react";
 import { Asistencia } from "@/Api/controllers/Asistencia";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import * as faceapi from "face-api.js";
 import { CSSTransition } from "react-transition-group";
+import { useFingerprintSocket } from "@/hooks/useFingerprintSocket"; // 👈 Importamos el hook
 
 export function SignUp() {
   const [idNumber, setIdNumber] = useState("");
-  const [faceDescriptor, setFaceDescriptor] = useState(null);
-  const [lastSentDescriptor, setLastSentDescriptor] = useState(null);
-  const [asistenciaInfo, setAsistenciaInfo] = useState(null); // Estado para la información de asistencia
+  const [asistenciaInfo, setAsistenciaInfo] = useState(null);
   const [mostrarCard, setMostrarcard] = useState(false);
-  const videoRef = useRef(null);
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("es-ES", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
+  const today = new Date();
   const navigate = useNavigate();
 
+  // ✅ Conexión automática al lector de huellas (ESP32)
+  const { connected, data: fingerprint } = useFingerprintSocket("ws://localhost:8080");
+
+  // ✅ Procesar automáticamente cuando llegue una huella
   useEffect(() => {
-    const loadModelsAndStartVideo = async () => {
-      const MODEL_URL =
-        "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model";
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error("Error al acceder a la cámara:", error);
-      }
-    };
-
-    loadModelsAndStartVideo();
-  }, []);
-
-  const asistencia = async (e) => {
-    if (e && e.preventDefault) {
-      e.preventDefault();
+    if (fingerprint && fingerprint.id) {
+      console.log("🖐️ Huella detectada:", fingerprint);
+      handleAsistenciaAuto(fingerprint.id);
     }
+  }, [fingerprint]);
+
+  // ✅ Buscar y registrar asistencia automáticamente
+  const handleAsistenciaAuto = async (idNum) => {
     try {
-      const dataToSend = idNumber
-        ? { idNumber }
-        : faceDescriptor
-        ? { fingerprintData: faceDescriptor }
-        : null;
-
-      if (!dataToSend) {
-        toast.error("Cédula o rostro no detectados");
-        return;
-      }
-
-      const asistente = await Asistencia(dataToSend);
+      const asistente = await Asistencia({ idNumber: idNum });
 
       if (asistente && asistente.expirationDate) {
         const expirationDate = new Date(asistente.expirationDate);
@@ -76,7 +44,7 @@ export function SignUp() {
           }),
           isVigente,
         });
-        //mostramos card con la informacion del usuario
+
         setMostrarcard(true);
       } else {
         toast.error("No se encontró el cliente.");
@@ -85,55 +53,93 @@ export function SignUp() {
       if (error.response && error.response.status === 404) {
         toast.error("Cliente no existe.");
       } else {
-        toast.error("Ocurrió un error inesperado.");
+        toast.error("Error procesando la huella.");
       }
+      console.error("❌ Error en asistencia automática:", error);
     }
   };
-  //controla el timer de la card
+
+  // ✅ También mantener el formulario manual (por si el lector falla)
+  const asistenciaManual = async (e) => {
+    e.preventDefault();
+
+    if (!idNumber) {
+      toast.error("Por favor, ingrese su número de cédula.");
+      return;
+    }
+
+    try {
+      const asistente = await Asistencia({ idNumber });
+
+      if (asistente && asistente.expirationDate) {
+        const expirationDate = new Date(asistente.expirationDate);
+        const isVigente = expirationDate >= today;
+
+        setAsistenciaInfo({
+          name: `${asistente.firstName} ${asistente.lastName}`,
+          formattedExpiration: expirationDate.toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          isVigente,
+        });
+
+        setMostrarcard(true);
+      } else {
+        toast.error("No se encontró el cliente.");
+      }
+    } catch (error) {
+      toast.error("Ocurrió un error al buscar el cliente.");
+    }
+  };
+
+  // ✅ Ocultar automáticamente el card después de 4 segundos
   useEffect(() => {
     let timer;
     if (mostrarCard) {
-      // Iniciar el temporizador cuando mostrarCard sea true
-      timer = setTimeout(() => {
-        setMostrarcard(false);
-      }, 3000); // 3000ms = 3 segundos
+      timer = setTimeout(() => setMostrarcard(false), 4000);
     }
-
-    // Limpiar el temporizador si el componente se desmonta o si mostrarCard cambia
     return () => clearTimeout(timer);
   }, [mostrarCard]);
 
   return (
     <section className="m-8 flex">
       <Toaster />
-      {/* Video para detección facial */}
-      <div className="w-2/5 h-full hidden lg:block">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          className="h-[80vh] w-full object-cover rounded-3xl"
-        />
-      </div>
 
-      <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
-        <div className="text-center">
-          <Typography variant="h2" className="font-bold mb-4">
-            Asistencia
+      <div className="w-full flex flex-col items-center justify-center">
+        <div className="text-center mb-4">
+          <Typography variant="h2" className="font-bold mb-2">
+            Control de Asistencia
           </Typography>
           <Typography
             variant="paragraph"
             color="blue-gray"
             className="text-lg font-normal"
           >
-            Ingresa tu número de cédula o espera la detección de rostro
+            Escanea tu huella o ingresa tu número de cédula para registrar asistencia.
           </Typography>
+
+          {/* Estado del lector */}
+          <p className="text-sm text-gray-500 mt-3">
+            Estado del lector:{" "}
+            <span
+              className={
+                connected ? "text-green-600 font-semibold" : "text-red-600 font-semibold"
+              }
+            >
+              {connected ? "Conectado ✅" : "Desconectado ❌"}
+            </span>
+          </p>
         </div>
+
+        {/* Formulario manual (opcional) */}
         <form
-          className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2"
+          className="mt-4 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2"
           onSubmit={(e) => {
             e.preventDefault();
-            asistencia(e);
+            asistenciaManual(e);
             setIdNumber("");
           }}
         >
@@ -157,7 +163,7 @@ export function SignUp() {
             />
           </div>
           <Button className="mt-6" fullWidth type="submit">
-            Asistencia
+            Registrar Asistencia
           </Button>
         </form>
 
@@ -165,12 +171,13 @@ export function SignUp() {
           Regresar
         </Button>
       </div>
-      {/*Para genera la transcicion suabe se necesita usar CSSTransition */}
+
+      {/* Card de resultado */}
       <CSSTransition
-        in={mostrarCard} // Controla si la animación "entra" o "sale"
-        timeout={300} // Duración de la animación
-        classNames="my-node" // Clases CSS para las transiciones
-        unmountOnExit // Desmonta el componente después de la animación de salida
+        in={mostrarCard}
+        timeout={300}
+        classNames="my-node"
+        unmountOnExit
       >
         <div
           className={`fixed top-[80%] lg:left-[25%] lg:top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 shadow-lg rounded-lg p-6 w-96 z-50 ${

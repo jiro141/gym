@@ -15,6 +15,7 @@ import { postClients } from "@/Api/controllers/Clients";
 import { createPaymet } from "@/Api/controllers/Paymet";
 import toast, { Toaster } from "react-hot-toast";
 import FaceDetection from "./FaceDetection"; // Importar el componente de detección de rostro
+import { useFingerprintSocket } from "@/hooks/useFingerprintSocket"; // 👈 nuevo import
 
 const CreateClient = ({ handleOpen, open, setOpen }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -35,7 +36,19 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
 
   const [faceDetected, setFaceDetected] = useState(false); // Estado para detección de rostro
   const [showFaceDetection, setShowFaceDetection] = useState(false); // Estado para mostrar el modal de detección
+  const { connected, data: fingerprint } = useFingerprintSocket(
+    "ws://localhost:8080"
+  );
 
+  useEffect(() => {
+    if (fingerprint && fingerprint.template) {
+      setFormData((prev) => ({
+        ...prev,
+        fingerprintData: fingerprint.template,
+      }));
+      toast.success("Huella capturada correctamente 🖐️");
+    }
+  }, [fingerprint]);
   // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +79,10 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
         };
 
         // Luego, intenta crear el pago con el id del cliente
-        const paymentResponse = await createPaymet(updatedPaymentData,formData.membershipType);
+        const paymentResponse = await createPaymet(
+          updatedPaymentData,
+          formData.membershipType
+        );
         if (paymentResponse) {
           toast.success("Pago realizado con éxito!");
           setTimeout(() => setOpen(false), 1500);
@@ -163,59 +179,47 @@ const CreateClient = ({ handleOpen, open, setOpen }) => {
 
         {activeStep === 2 && (
           <div className="space-y-4">
-            <div className="p-4 bg-gray-100 rounded">
-              <h3 className="text-lg font-semibold">Confirmación de Datos</h3>
+            {/* ...datos de confirmación existentes */}
+
+            {/* 🔥 Bloque de lectura de huella */}
+            <div className="p-4 bg-gray-100 rounded border border-gray-300 mt-4">
+              <h3 className="text-lg font-semibold mb-2">Lectura de Huella</h3>
               <p>
-                <strong>Nombre:</strong> {formData.firstName}{" "}
-                {formData.lastName}
+                Estado del lector:{" "}
+                <span
+                  className={
+                    connected
+                      ? "text-green-600 font-bold"
+                      : "text-red-600 font-bold"
+                  }
+                >
+                  {connected ? "Conectado" : "Desconectado"}
+                </span>
               </p>
-              <p>
-                <strong>ID:</strong> {formData.idNumber}
-              </p>
-              <p>
-                <strong>Edad:</strong> {formData.age}
-              </p>
-              <p>
-                <strong>Género:</strong>{" "}
-                {formData.gender === "male"
-                  ? "Masculino"
-                  : formData.gender === "female"
-                  ? "Femenino"
-                  : "Otro"}
-              </p>
-              <p>
-                <strong>Tipo de Membresía:</strong>{" "}
-                {formData.membershipType.charAt(0).toUpperCase() +
-                  formData.membershipType.slice(1)}
-              </p>
+
+              {fingerprint ? (
+                <div className="mt-2">
+                  <p>
+                    <b>ID del sensor:</b> {fingerprint.id}
+                  </p>
+                  <p>
+                    <b>Confianza:</b> {fingerprint.confidence}
+                  </p>
+                  <p className="text-xs text-gray-500 break-words mt-2">
+                    <b>Template capturado:</b>
+                    <br />
+                    {fingerprint.template.substring(0, 60)}...
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-500 mt-2">
+                  Esperando lectura de huella...
+                </p>
+              )}
             </div>
-            <div className="space-y-4 text-black">
-              <Select
-                label="Moneda de pago"
-                value={paymentData.currency}
-                onChange={(value) =>
-                  setPaymentData({ ...paymentData, currency: value })
-                }
-                required
-              >
-                <Option className="text-black font-bold	" value="pesos">
-                  pesos
-                </Option>
-                <Option className="text-black font-bold	" value="dolares">
-                  dolares
-                </Option>
-              </Select>
-              {/* <Input
-                label="Monto"
-                name="amount"
-                type="number"
-                value={paymentData.amount}
-                onChange={handlePaymentDataChange}
-                required
-              /> */}
-            </div>
-            {/* Botón para detectar rostro */}
-            <div className=" mt-8 flex  justify-between	">
+
+            {/* Botones */}
+            <div className="mt-8 flex justify-between">
               <Button onClick={toggleFaceDetection} color="blue">
                 Detectar Rostro
               </Button>
