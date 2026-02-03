@@ -93,23 +93,24 @@ export function Tables() {
 
   const today = new Date();
 
- const contabilizarAsistentesTotales = (clientes) => {
-  if (clientes.length === 0) return 0;
+  const contabilizarAsistentesTotales = (clientes) => {
+    if (clientes.length === 0) return 0;
 
-  // Accedemos al último elemento del array
-  const ultimoRegistro = clientes.at(-1); 
-  
-  // Retornamos el valor de totalAttendance
-  return ultimoRegistro.totalAttendance;
-};
-const obtenerClientesTotales = (clientes) => {
-  // Verificamos que el array no esté vacío para evitar errores
-  if (!clientes || clientes.length === 0) return 0;
+    // Accedemos al último elemento del array
+    const ultimoRegistro = clientes.at(-1);
 
-  // Accedemos al último objeto y extraemos totalClients
-  const resumen = clientes.at(-1); 
-  return resumen.totalClients || 0;
-};
+    // Retornamos el valor de totalAttendance
+    return ultimoRegistro.totalAttendance;
+  };
+  const obtenerClientesTotales = (clientes) => {
+    // Verificamos que el array no esté vacío para evitar errores
+    if (!clientes || clientes.length === 0) return 0;
+
+    // Accedemos al último objeto y extraemos totalClients
+    const resumen = clientes.at(-1);
+    return resumen.totalClients || 0;
+  };
+  console.log(clients[-1]?.totalClients, "total clients");
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -181,11 +182,10 @@ const obtenerClientesTotales = (clientes) => {
                     isActive,
                     membershipType,
                   }) => {
-                    const className = `py-3 px-5 ${
-                      id === clients.length - 1
+                    const className = `py-3 px-5 ${id === clients.length - 1
                         ? ""
                         : "border-b border-blue-gray-50"
-                    }`;
+                      }`;
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
                       const options = {
@@ -241,15 +241,15 @@ const obtenerClientesTotales = (clientes) => {
                               membershipType === "permanente"
                                 ? "blue-gray"
                                 : today >= expirationD
-                                ? "red"
-                                : "blue-gray"
+                                  ? "red"
+                                  : "blue-gray"
                             }
                             value={
                               membershipType === "permanente"
                                 ? "Activo"
                                 : today >= expirationD
-                                ? "Vencido"
-                                : "Activo"
+                                  ? "Vencido"
+                                  : "Activo"
                             }
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
@@ -309,11 +309,10 @@ const obtenerClientesTotales = (clientes) => {
                     isActive,
                     membershipType,
                   }) => {
-                    const className = `py-3 px-5 ${
-                      id === clientsSearch.length - 1
+                    const className = `py-3 px-5 ${id === clientsSearch.length - 1
                         ? ""
                         : "border-b border-blue-gray-50"
-                    }`;
+                      }`;
                     // Formatear las fechas a 'dd-mm-aaaa'
                     const formatDate = (date) => {
                       const options = {
@@ -369,15 +368,15 @@ const obtenerClientesTotales = (clientes) => {
                               membershipType === "permanente"
                                 ? "blue-gray"
                                 : today >= expirationD
-                                ? "red"
-                                : "blue-gray"
+                                  ? "red"
+                                  : "blue-gray"
                             }
                             value={
                               membershipType === "permanente"
                                 ? "Activo"
                                 : today >= expirationD
-                                ? "Vencido"
-                                : "Activo"
+                                  ? "Vencido"
+                                  : "Activo"
                             }
                             className="py-0.5 px-2 text-[11px] font-medium w-fit"
                           />
