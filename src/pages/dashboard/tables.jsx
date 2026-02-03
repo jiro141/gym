@@ -93,12 +93,23 @@ export function Tables() {
 
   const today = new Date();
 
-  const contabilizarAsistentesTotales = (clientes) => {
-    const asistentesTotales = clientes.filter((cliente) => {
-      return cliente.attendance === true;
-    });
-    return asistentesTotales.length;
-  };
+ const contabilizarAsistentesTotales = (clientes) => {
+  if (clientes.length === 0) return 0;
+
+  // Accedemos al último elemento del array
+  const ultimoRegistro = clientes.at(-1); 
+  
+  // Retornamos el valor de totalAttendance
+  return ultimoRegistro.totalAttendance;
+};
+const obtenerClientesTotales = (clientes) => {
+  // Verificamos que el array no esté vacío para evitar errores
+  if (!clientes || clientes.length === 0) return 0;
+
+  // Accedemos al último objeto y extraemos totalClients
+  const resumen = clientes.at(-1); 
+  return resumen.totalClients || 0;
+};
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -109,7 +120,7 @@ export function Tables() {
           className="mb-8 p-6 flex  justify-between"
         >
           <Typography variant="h6" color="white">
-            Cantidad de clientes: {clients?.length}
+            Cantidad de clientes: {obtenerClientesTotales(clients)}
             <p>Asistentes de hoy: {contabilizarAsistentesTotales(clients)}</p>
           </Typography>
           <div className="mr-auto md:mr-4 md:w-56">
